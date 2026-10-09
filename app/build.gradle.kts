@@ -3,6 +3,8 @@ plugins {
     kotlin("android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+// CI supplies these only to a trusted, tagged release build. Never store keys here.
+val releaseKeystore = providers.environmentVariable("AURALIS_KEYSTORE_PATH").orNull
 android {
     namespace = "app.auralis"
     compileSdk = 36
@@ -12,6 +14,17 @@ android {
         targetSdk = 36
         versionCode = 6
         versionName = "0.5.0-dev"
+    }
+    if (releaseKeystore != null) {
+        signingConfigs {
+            create("ciRelease") {
+                storeFile = file(releaseKeystore)
+                storePassword = providers.environmentVariable("AURALIS_STORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("AURALIS_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("AURALIS_KEY_PASSWORD").get()
+            }
+        }
+        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("ciRelease")
     }
     buildFeatures { compose = true }
     testOptions {

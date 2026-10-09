@@ -1,0 +1,27 @@
+name: Bug report
+description: Report a reproducible Auralis issue
+title: '[Bug] '
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Auralis version or commit
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Phone model and Android version
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps, expected behavior, and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or screenshots
+      description: Remove tokens, private URLs, personal data and copyrighted audio. Report security vulnerabilities privately.

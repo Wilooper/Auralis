@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest a player or extension capability
+title: '[Feature] '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and alternatives
+    validations:
+      required: true
+  - type: textarea
+    id: resources
+    attributes:
+      label: Device performance, privacy, and permission considerations

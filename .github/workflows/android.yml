@@ -1,40 +1,68 @@
 name: Android Checks
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: android-${{ github.workflow }}-${{ github.ref }}
+  group: android-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  prototype:
+  quality:
+    name: SDK and workflow checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Install SDK packages
-        run: yes | sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
       - name: SDK and reference-server tests
         run: python3 -m unittest discover -s sdk/python -p 'test_*.py'
-      - name: Test, lint and compile
-        run: ./gradlew :core-model:test :app:testDebugUnitTest :core-playback:lintDebug :app:lintDebug :app:assembleDebug --stacktrace
-      - uses: actions/upload-artifact@v4
+      - name: Release tooling tests
+        run: python3 -m unittest discover -s scripts/ci -p 'test_*.py'
+      - name: Validate JSON contracts
+        run: python3 scripts/ci/check_json.py
+      - name: Check workflow syntax and expressions
+        run: bash scripts/ci/actionlint.sh
+  android:
+    name: Android tests, lint and APKs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/android-setup
+      - name: Tests and lint
+        run: ./gradlew :core-model:test :app:testDebugUnitTest :core-playback:lintDebug :app:lintDebug --no-daemon --stacktrace
+      - name: Build all debug APKs
+        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+      - name: Verify APK signatures and ZIP alignment
+        run: bash scripts/ci/verify-apks.sh app/build/outputs/apk/debug
+      - name: Upload verification reports
         if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: verification-reports
+          name: verification-reports-${{ github.run_id }}
+          retention-days: 14
           path: |
-            core-model/build/reports/tests/
-            app/build/reports/tests/
-            app/build/reports/lint-results-debug.*
-      - uses: actions/upload-artifact@v4
+            **/build/reports/
+            **/build/test-results/
+      - name: Upload APKs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: auralis-arm64-debug
-          path: app/build/outputs/apk/debug/*arm64-v8a*.apk
+          name: auralis-debug-apks-${{ github.run_id }}
+          retention-days: 14
           if-no-files-found: error
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/debug/SHA256SUMS.txt
+      - name: Installation notice
+        run: |
+          printf '%s\n' '### Test APKs' 'APKs and SHA256SUMS are in the run artifacts. These use a temporary CI debug key, not the private key used for previous phone builds. They may require uninstalling a differently signed test app. Back up app settings first; uninstalling clears app data.' >> "$GITHUB_STEP_SUMMARY"

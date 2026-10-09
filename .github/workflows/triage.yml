@@ -1,0 +1,56 @@
+name: Issue and PR triage
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+concurrency:
+  group: triage-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  label:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Never checkout or execute contributor code in this privileged workflow.
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const item = context.payload.pull_request || context.payload.issue;
+            const labels = new Map([
+              ['needs-triage', 'ededed'], ['bug', 'd73a4a'],
+              ['enhancement', 'a2eeef'], ['area: android', '1d76db'],
+              ['area: playback', '5319e7'], ['area: extensions', '0e8a16'],
+              ['area: ci', 'fbca04'], ['documentation', '0075ca'],
+              ['dependencies', '0366d6']
+            ]);
+            const selected = new Set();
+            if (context.payload.pull_request) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {owner, repo, pull_number: item.number, per_page: 100});
+              for (const {filename} of files) {
+                if (filename.startsWith('app/')) selected.add('area: android');
+                if (filename.startsWith('core-playback/')) selected.add('area: playback');
+                if (filename.startsWith('sdk/') || filename.includes('/extensions/')) selected.add('area: extensions');
+                if (filename.startsWith('.github/') || filename.startsWith('scripts/ci/')) selected.add('area: ci');
+                if (filename.endsWith('.md') || filename.startsWith('docs/')) selected.add('documentation');
+              }
+              if (item.user.login === 'dependabot[bot]') selected.add('dependencies');
+            } else {
+              selected.add('needs-triage');
+              if (item.title.startsWith('[Bug]')) selected.add('bug');
+              if (item.title.startsWith('[Feature]')) selected.add('enhancement');
+            }
+            for (const name of selected) {
+              try { await github.rest.issues.getLabel({owner, repo, name}); }
+              catch (e) {
+                if (e.status !== 404) throw e;
+                try { await github.rest.issues.createLabel({owner, repo, name, color: labels.get(name)}); }
+                catch (e2) { if (e2.status !== 422) throw e2; }
+              }
+            }
+            if (selected.size) await github.rest.issues.addLabels({owner, repo, issue_number: item.number, labels: [...selected]});

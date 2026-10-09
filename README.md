@@ -92,4 +92,6 @@ Original Auralis source uses Apache-2.0 as an initial open-source default. LibVL
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) for builds, tests and extension contributions. See [SECURITY.md](SECURITY.md) for the bridge boundary and reporting guidance. The [planning pack](docs/planning/README.md) records the original design and backlog; [V5-SDK.md](V5-SDK.md) and the implemented SDK contracts describe the current behavior.
 
-CI runs Android tests, lint and a debug APK build, plus the SDK/reference-server tests. CI APKs use an ephemeral development certificate and cannot update the previously delivered phone builds; keep your existing private development signing key outside the repository for compatible local updates.
+CI runs Android tests, lint, SDK/reference-server tests, workflow checks and signature-verified debug APK builds. CodeQL and dependency review provide automated security checks; Dependabot proposes updates. Issue/PR triage and a main-branch CI-failure reporter support maintainers. Version tags trigger tested APK/source/SDK releases. See [GitHub automation and signing setup](docs/GITHUB-AUTOMATION.md).
+
+CI APKs use an ephemeral development certificate and cannot update differently signed phone builds. Production releases require the private signing secrets described in the automation guide; keys never belong in this repository.

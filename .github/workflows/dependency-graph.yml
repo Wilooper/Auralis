@@ -1,0 +1,29 @@
+name: Gradle Dependency Graph
+on:
+  push:
+    branches: [main]
+    paths: ['**/*.gradle.kts', '**/gradle.lockfile', 'gradle/**', '.github/workflows/dependency-graph.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dependency-graph-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  submit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/android-setup
+      - name: Submit resolved Gradle dependencies
+        uses: gradle/actions/dependency-submission@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
+        with:
+          additional-arguments: --no-daemon --no-configuration-cache
+          dependency-graph: generate-and-submit
+          dependency-graph-include-configurations: '.*[Rr]untimeClasspath'

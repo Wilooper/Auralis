@@ -1,0 +1,42 @@
+name: CI failure reporter
+on:
+  workflow_run:
+    workflows: [Android Checks]
+    types: [completed]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  report:
+    if: >-
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Read metadata only: never check out a triggering run or download its artifacts.
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const run = context.payload.workflow_run;
+            if (!['success', 'failure', 'timed_out'].includes(run.conclusion)) return;
+            const current = await github.rest.git.getRef({owner, repo, ref: 'heads/main'});
+            if (current.data.object.sha !== run.head_sha) return;
+            const marker = '<!-- auralis-ci-failure -->';
+            const issues = await github.paginate(github.rest.issues.listForRepo, {owner, repo, state: 'open', creator: 'github-actions[bot]', per_page: 100});
+            const issue = issues.find(i => !i.pull_request && i.body?.startsWith(marker));
+            if (run.conclusion === 'success') {
+              if (issue) {
+                await github.rest.issues.createComment({owner, repo, issue_number: issue.number, body: `Android Checks passed on current main: ${run.html_url}`});
+                await github.rest.issues.update({owner, repo, issue_number: issue.number, state: 'closed', state_reason: 'completed'});
+              }
+              return;
+            }
+            const body = `${marker}\nAndroid Checks failed on current main.\n\nCommit: ${run.head_sha}\nRun: ${run.html_url}\n\nThis bot updates one open issue and closes it when current main passes. It does not publish logs or secrets.`;
+            if (issue) {
+              await github.rest.issues.update({owner, repo, issue_number: issue.number, body});
+            } else {
+              await github.rest.issues.create({owner, repo, title: '[CI] Android Checks failing on main', body});
+            }

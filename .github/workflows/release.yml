@@ -1,0 +1,124 @@
+name: Tagged Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    name: Validate and build release assets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate tag and trusted ancestry
+        id: version
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          python3 scripts/ci/release_metadata.py
+      - uses: ./.github/actions/android-setup
+        with:
+          cache-disabled: 'true'
+      - name: Test release sources
+        run: |
+          python3 -m unittest discover -s sdk/python -p 'test_*.py'
+          python3 -m unittest discover -s scripts/ci -p 'test_*.py'
+          python3 scripts/ci/check_json.py
+          bash scripts/ci/actionlint.sh
+          ./gradlew :core-model:test :app:testDebugUnitTest :app:lintDebug :core-playback:lintDebug --no-daemon --stacktrace
+      - name: Build development APKs
+        if: steps.version.outputs.prerelease == 'true'
+        run: |
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+          bash scripts/ci/verify-apks.sh app/build/outputs/apk/debug
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/*.apk dist/
+      - name: Build signed stable APKs
+        if: steps.version.outputs.prerelease == 'false'
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.AURALIS_RELEASE_KEYSTORE_BASE64 }}
+          AURALIS_STORE_PASSWORD: ${{ secrets.AURALIS_RELEASE_STORE_PASSWORD }}
+          AURALIS_KEY_ALIAS: ${{ secrets.AURALIS_RELEASE_KEY_ALIAS }}
+          AURALIS_KEY_PASSWORD: ${{ secrets.AURALIS_RELEASE_KEY_PASSWORD }}
+        run: |
+          : "${RELEASE_KEYSTORE_BASE64:?Add AURALIS_RELEASE_KEYSTORE_BASE64 repository secret}"
+          : "${AURALIS_STORE_PASSWORD:?Add AURALIS_RELEASE_STORE_PASSWORD repository secret}"
+          : "${AURALIS_KEY_ALIAS:?Add AURALIS_RELEASE_KEY_ALIAS repository secret}"
+          : "${AURALIS_KEY_PASSWORD:?Add AURALIS_RELEASE_KEY_PASSWORD repository secret}"
+          umask 077
+          export AURALIS_KEYSTORE_PATH="$RUNNER_TEMP/auralis-release.keystore"
+          trap 'rm -f -- "$AURALIS_KEYSTORE_PATH"' EXIT
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$AURALIS_KEYSTORE_PATH"
+          unset RELEASE_KEYSTORE_BASE64
+          ./gradlew :app:assembleRelease --no-daemon --no-build-cache --no-configuration-cache --stacktrace
+          bash scripts/ci/verify-apks.sh app/build/outputs/apk/release
+          mkdir -p dist
+          cp app/build/outputs/apk/release/*.apk dist/
+      - name: Package source, SDK, checksums and notes
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          git archive --format=zip --prefix=Auralis/ HEAD -o "dist/Auralis-$RELEASE_TAG-Source.zip"
+          git archive --format=zip HEAD sdk -o "dist/Auralis-$RELEASE_TAG-Community-SDK.zip"
+          printf '%s\n' "Auralis $RELEASE_TAG" "Source commit: $GITHUB_SHA" > dist/RELEASE-NOTES.md
+          if [[ "$PRERELEASE" == true ]]; then
+            printf '\n%s\n' 'Development preview, not a stable release. APKs use a temporary CI debug key and may require uninstalling earlier builds (which clears app settings). Physical-device/security validation remains open. Do not use this key for production.' >> dist/RELEASE-NOTES.md
+          else
+            printf '\n%s\n' 'APKs are signed with the configured release key. Successful automation does not replace physical-device testing or third-party license review.' >> dist/RELEASE-NOTES.md
+          fi
+          (cd dist && sha256sum -- *.apk *.zip RELEASE-NOTES.md > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-assets
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-test-reports
+          path: '**/build/reports/'
+          retention-days: 14
+  publish:
+    name: Publish verified assets
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # No source checkout or builds in this write-enabled job.
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-assets
+          path: dist
+      - name: Verify files and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          (cd dist && sha256sum --check --strict SHA256SUMS.txt)
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo 'This release already exists. Existing releases are not overwritten.' >&2
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" dist/* --verify-tag --draft --title "Auralis $RELEASE_TAG" --notes-file dist/RELEASE-NOTES.md --generate-notes --prerelease="$PRERELEASE"
+          if [[ "$PRERELEASE" == true ]]; then
+            gh release edit "$RELEASE_TAG" --draft=false --latest=false
+          else
+            gh release edit "$RELEASE_TAG" --draft=false --latest
+          fi
