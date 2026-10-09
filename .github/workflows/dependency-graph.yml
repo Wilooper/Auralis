@@ -22,6 +22,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/android-setup
       - name: Submit resolved Gradle dependencies
+        continue-on-error: true
         uses: gradle/actions/dependency-submission@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
         with:
           additional-arguments: --no-daemon --no-configuration-cache
