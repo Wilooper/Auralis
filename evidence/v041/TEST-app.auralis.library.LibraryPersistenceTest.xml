@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.library.LibraryPersistenceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T10:36:52" hostname="273f13c551bc" time="5.009">
+  <properties/>
+  <testcase name="aChangedFileInvalidatesCachedMetadata" classname="app.auralis.library.LibraryPersistenceTest" time="3.005"/>
+  <testcase name="incrementalAddAndDeletionPreserveOtherFolderMembership" classname="app.auralis.library.LibraryPersistenceTest" time="0.051"/>
+  <testcase name="repeatedScansKeepEnrichedMetadataAndRecentlyPlayedHistory" classname="app.auralis.library.LibraryPersistenceTest" time="0.042"/>
+  <testcase name="schemaOneUpgradeKeepsLibraryQueueAndHistory" classname="app.auralis.library.LibraryPersistenceTest" time="0.05"/>
+  <testcase name="tenThousandTracksWarmBrowseSearchAndDeltaBenchmark" classname="app.auralis.library.LibraryPersistenceTest" time="1.591"/>
+  <testcase name="searchesUseLiteralPercentUnderscoreAndArtistAlbumFilters" classname="app.auralis.library.LibraryPersistenceTest" time="0.037"/>
+  <testcase name="mediaIndexReconciliationKeepsUnindexedSafFiles" classname="app.auralis.library.LibraryPersistenceTest" time="0.032"/>
+  <testcase name="queueAndPositionRestoreWithoutAutoplay" classname="app.auralis.library.LibraryPersistenceTest" time="0.082"/>
+  <testcase name="reopenRestoresFoldersSongsAndSearchWithoutAFileScan" classname="app.auralis.library.LibraryPersistenceTest" time="0.035"/>
+  <testcase name="analysisCacheInvalidatesChangedFilesAndHistoryCanClear" classname="app.auralis.library.LibraryPersistenceTest" time="0.049"/>
+  <testcase name="favoritesSurviveReopenMetadataRefreshAndFolderOverlap" classname="app.auralis.library.LibraryPersistenceTest" time="0.033"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Robolectric] WARN: Android SDK 36 requires Java 21 (have Java 17). Tests won't be run on SDK 36 unless explicitly requested.
+]]></system-err>
+</testsuite>

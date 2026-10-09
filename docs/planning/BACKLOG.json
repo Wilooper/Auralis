@@ -1,0 +1,370 @@
+{
+  "schemaVersion": 1,
+  "project": "Advanced Android Music Player",
+  "direction": "Kotlin/Compose + LibVLC",
+  "generatedOn": "2026-10-07",
+  "statusMeaning": {
+    "planned": "Not implemented",
+    "in_progress": "Implementation underway",
+    "blocked": "Dependency or evidence missing",
+    "done": "Acceptance evidence attached"
+  },
+  "tasks": [
+    {
+      "id": "P001",
+      "milestone": "M0",
+      "title": "Pin build tools, LibVLC artifact and licenses",
+      "status": "planned",
+      "dependsOn": [],
+      "acceptance": "Reproducible debug build and dependency record",
+      "evidence": []
+    },
+    {
+      "id": "P002",
+      "milestone": "M0",
+      "title": "Implement content-URI LibVLC playback prototype",
+      "status": "planned",
+      "dependsOn": [
+        "P001"
+      ],
+      "acceptance": "Corpus plays/seeks or returns typed errors",
+      "evidence": []
+    },
+    {
+      "id": "P003",
+      "milestone": "M0",
+      "title": "Connect Android media session and playback service",
+      "status": "planned",
+      "dependsOn": [
+        "P002"
+      ],
+      "acceptance": "Notification, headset and screen-off tests",
+      "evidence": []
+    },
+    {
+      "id": "P004",
+      "milestone": "M0",
+      "title": "Prototype overlapping two-player crossfade",
+      "status": "planned",
+      "dependsOn": [
+        "P002"
+      ],
+      "acceptance": "Recorded overlap with clipping/timing findings",
+      "evidence": []
+    },
+    {
+      "id": "P005",
+      "milestone": "M0",
+      "title": "Validate transitions, lifecycle and baseline performance",
+      "status": "planned",
+      "dependsOn": [
+        "P003",
+        "P004"
+      ],
+      "acceptance": "M0 device report; unrun checks marked",
+      "evidence": []
+    },
+    {
+      "id": "P006",
+      "milestone": "M0",
+      "title": "Choose engine/transition architecture",
+      "status": "planned",
+      "dependsOn": [
+        "P005"
+      ],
+      "acceptance": "Decision record permits M1 or explains revised design",
+      "evidence": []
+    },
+    {
+      "id": "P007",
+      "milestone": "M1",
+      "title": "Define core records and source-scoped identities",
+      "status": "planned",
+      "dependsOn": [
+        "P006"
+      ],
+      "acceptance": "Stable records with expiry/provenance semantics",
+      "evidence": []
+    },
+    {
+      "id": "P008",
+      "milestone": "M1",
+      "title": "Add Room library and SAF/MediaStore indexing",
+      "status": "planned",
+      "dependsOn": [
+        "P007"
+      ],
+      "acceptance": "Incremental import and permission-loss handling",
+      "evidence": []
+    },
+    {
+      "id": "P009",
+      "milestone": "M1",
+      "title": "Implement authoritative persistent queue",
+      "status": "planned",
+      "dependsOn": [
+        "P007",
+        "P003"
+      ],
+      "acceptance": "Reorder and restore with explicit user entries",
+      "evidence": []
+    },
+    {
+      "id": "P010",
+      "milestone": "M1",
+      "title": "Add cached artwork and basic Compose library",
+      "status": "planned",
+      "dependsOn": [
+        "P008"
+      ],
+      "acceptance": "Bounded artwork cache and responsive browsing",
+      "evidence": []
+    },
+    {
+      "id": "P011",
+      "milestone": "M1",
+      "title": "Add local plain/LRC lyrics and clock integration",
+      "status": "planned",
+      "dependsOn": [
+        "P009"
+      ],
+      "acceptance": "Seek/rate/track change synchronization",
+      "evidence": []
+    },
+    {
+      "id": "P012",
+      "milestone": "M1",
+      "title": "Complete local alpha gate",
+      "status": "planned",
+      "dependsOn": [
+        "P009",
+        "P010",
+        "P011"
+      ],
+      "acceptance": "VALIDATION core scenarios pass",
+      "evidence": []
+    },
+    {
+      "id": "P013",
+      "milestone": "M2",
+      "title": "Define appearance slots and versioned preset validation",
+      "status": "planned",
+      "dependsOn": [
+        "P012"
+      ],
+      "acceptance": "Unknown IDs fall back; invalid imports rejected",
+      "evidence": []
+    },
+    {
+      "id": "P014",
+      "milestone": "M2",
+      "title": "Build two mixable appearance presets",
+      "status": "planned",
+      "dependsOn": [
+        "P013"
+      ],
+      "acceptance": "Mixed home/player/miniplayer without playback restart",
+      "evidence": []
+    },
+    {
+      "id": "P015",
+      "milestone": "M2",
+      "title": "Ship verified transition controls",
+      "status": "planned",
+      "dependsOn": [
+        "P006",
+        "P012"
+      ],
+      "acceptance": "Behavior matches chosen architecture; limits documented",
+      "evidence": []
+    },
+    {
+      "id": "P016",
+      "milestone": "M3",
+      "title": "Parse offline playlist commands",
+      "status": "planned",
+      "dependsOn": [
+        "P007",
+        "P012"
+      ],
+      "acceptance": "Contradictions and strict filters handled",
+      "evidence": []
+    },
+    {
+      "id": "P017",
+      "milestone": "M3",
+      "title": "Add temporary playlist preview and recovery",
+      "status": "planned",
+      "dependsOn": [
+        "P016",
+        "P009"
+      ],
+      "acceptance": "Session is restored but saved only by user",
+      "evidence": []
+    },
+    {
+      "id": "P018",
+      "milestone": "M3",
+      "title": "Implement metadata/history similarity baseline",
+      "status": "planned",
+      "dependsOn": [
+        "P008",
+        "P009"
+      ],
+      "acceptance": "Ranked candidates with confidence/explanation",
+      "evidence": []
+    },
+    {
+      "id": "P019",
+      "milestone": "M3",
+      "title": "Validate personal beta",
+      "status": "planned",
+      "dependsOn": [
+        "P014",
+        "P015",
+        "P017",
+        "P018"
+      ],
+      "acceptance": "UI and command acceptance checks pass",
+      "evidence": []
+    },
+    {
+      "id": "P020",
+      "milestone": "M4",
+      "title": "Define source SDK and capability negotiation",
+      "status": "planned",
+      "dependsOn": [
+        "P007",
+        "P012"
+      ],
+      "acceptance": "Cancellation, paging and typed failures",
+      "evidence": []
+    },
+    {
+      "id": "P021",
+      "milestone": "M4",
+      "title": "Implement one self-hosted source and credential store",
+      "status": "planned",
+      "dependsOn": [
+        "P020"
+      ],
+      "acceptance": "Multiple instances; expiring streams refreshed",
+      "evidence": []
+    },
+    {
+      "id": "P022",
+      "milestone": "M4",
+      "title": "Publish sample provider and fixtures",
+      "status": "planned",
+      "dependsOn": [
+        "P021"
+      ],
+      "acceptance": "Provider addition needs no UI/queue modification",
+      "evidence": []
+    },
+    {
+      "id": "P023",
+      "milestone": "M5",
+      "title": "Validate embedded server and Android lifecycle",
+      "status": "planned",
+      "dependsOn": [
+        "P012"
+      ],
+      "acceptance": "Screen-off session path compliant and tested",
+      "evidence": []
+    },
+    {
+      "id": "P024",
+      "milestone": "M5",
+      "title": "Implement scoped LAN invites and range streaming",
+      "status": "planned",
+      "dependsOn": [
+        "P023",
+        "P008"
+      ],
+      "acceptance": "Authorization/revocation on every resource",
+      "evidence": []
+    },
+    {
+      "id": "P025",
+      "milestone": "M5",
+      "title": "Add browser player and QR join",
+      "status": "planned",
+      "dependsOn": [
+        "P024"
+      ],
+      "acceptance": "Guest independent playback, seeking and unsupported-codec feedback",
+      "evidence": []
+    },
+    {
+      "id": "P026",
+      "milestone": "M5",
+      "title": "Validate connected beta",
+      "status": "planned",
+      "dependsOn": [
+        "P021",
+        "P025",
+        "P019"
+      ],
+      "acceptance": "Provider and sharing tests pass",
+      "evidence": []
+    },
+    {
+      "id": "P027",
+      "milestone": "M6",
+      "title": "Select licensed multilingual model and evaluation subset",
+      "status": "planned",
+      "dependsOn": [
+        "P018"
+      ],
+      "acceptance": "Weight license/preprocessing/quality evidence",
+      "evidence": []
+    },
+    {
+      "id": "P028",
+      "milestone": "M6",
+      "title": "Implement cancellable cached audio analysis",
+      "status": "planned",
+      "dependsOn": [
+        "P027",
+        "P002"
+      ],
+      "acceptance": "No playback disruption; budgets measured",
+      "evidence": []
+    },
+    {
+      "id": "P029",
+      "milestone": "M6",
+      "title": "Implement bounded mood-route search",
+      "status": "planned",
+      "dependsOn": [
+        "P028",
+        "P017"
+      ],
+      "acceptance": "Missing bridge tracks reported; pinned tracks preserved",
+      "evidence": []
+    },
+    {
+      "id": "P030",
+      "milestone": "M7",
+      "title": "Design signed external-provider IPC",
+      "status": "planned",
+      "dependsOn": [
+        "P022"
+      ],
+      "acceptance": "Stable SDK major/minor and bounded payloads",
+      "evidence": []
+    },
+    {
+      "id": "P031",
+      "milestone": "M7",
+      "title": "Publish external extension sample and crash tests",
+      "status": "planned",
+      "dependsOn": [
+        "P030"
+      ],
+      "acceptance": "Provider crash does not stop local playback",
+      "evidence": []
+    }
+  ]
+}

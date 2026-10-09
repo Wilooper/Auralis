@@ -1,0 +1,150 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:clean
+> Task :core-model:clean
+> Task :core-playback:clean
+> Task :core-model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-model:processResources NO-SOURCE
+> Task :core-model:processTestResources NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :core-playback:preBuild UP-TO-DATE
+> Task :core-playback:preDebugBuild UP-TO-DATE
+> Task :core-playback:writeDebugAarMetadata
+> Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :core-playback:generateDebugResValues
+> Task :core-playback:generateDebugResources
+> Task :core-playback:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:mergeDebugResources
+> Task :app:packageDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :core-playback:extractDeepLinksDebug
+> Task :core-playback:processDebugManifest
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :core-playback:compileDebugLibraryResources
+> Task :core-playback:parseDebugLocalResources
+> Task :core-playback:generateDebugRFile
+> Task :app:processDebugResources
+> Task :core-playback:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-playback:javaPreCompileDebug
+> Task :app:javaPreCompileDebug
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :core-playback:mergeDebugJniLibFolders
+> Task :core-playback:mergeDebugNativeLibs NO-SOURCE
+> Task :core-playback:stripDebugDebugSymbols NO-SOURCE
+> Task :core-playback:copyDebugJniLibsProjectAndLocalJars
+> Task :core-playback:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :core-playback:mergeDebugShaders
+> Task :core-playback:compileDebugShaders NO-SOURCE
+> Task :core-playback:generateDebugAssets UP-TO-DATE
+> Task :core-playback:mergeDebugAssets
+> Task :core-playback:prepareDebugArtProfile UP-TO-DATE
+> Task :core-playback:prepareLintJarForPublish UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues
+> Task :core-playback:writeDebugLintModelMetadata
+> Task :app:extractProguardFiles
+> Task :core-playback:extractProguardFiles
+> Task :core-playback:preDebugAndroidTestBuild UP-TO-DATE
+> Task :core-playback:generateDebugAndroidTestResValues
+> Task :core-playback:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:checkDebugDuplicateClasses
+> Task :core-model:compileKotlin
+> Task :core-model:compileJava NO-SOURCE
+> Task :core-model:classes UP-TO-DATE
+> Task :core-model:jar
+> Task :app:mergeExtDexDebug
+> Task :core-model:compileTestKotlin
+> Task :core-model:compileTestJava NO-SOURCE
+> Task :core-model:testClasses UP-TO-DATE
+> Task :core-model:test
+> Task :core-playback:compileDebugKotlin
+> Task :core-playback:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-playback:bundleLibCompileToJarDebug
+> Task :core-playback:bundleLibRuntimeToJarDebug
+> Task :core-playback:processDebugJavaRes
+> Task :core-playback:extractDebugAnnotations
+> Task :core-playback:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :core-playback:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :core-playback:mergeDebugJavaResource
+> Task :core-playback:syncDebugLibJars
+> Task :core-playback:bundleDebugLocalLintAar
+> Task :core-playback:createFullJarDebug
+> Task :core-playback:generateDebugLintModel
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:compileDebugUnitTestKotlin
+w: file:///workspace/scratch/c53731def2fc/auralis/app/src/test/kotlin/app/auralis/library/Id3LyricsTest.kt:46:27 Java type mismatch: inferred type is 'String?', but 'String' was expected.
+
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :core-playback:generateDebugAndroidTestLintModel
+> Task :core-playback:generateDebugUnitTestLintModel
+> Task :core-playback:lintAnalyzeDebugAndroidTest
+> Task :core-playback:lintAnalyzeDebugUnitTest
+> Task :core-playback:generateDebugLintReportModel
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:mergeDebugJavaResource
+> Task :core-playback:bundleLibRuntimeToDirDebug
+> Task :app:mergeLibDexDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :core-playback:copyDebugJniLibsProjectOnly
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libc++_shared.so, libvlc.so, libvlcjni.so. Run with --info option to learn more.
+
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :core-playback:lintAnalyzeDebug
+> Task :app:packageDebug
+
+> Task :core-playback:lintReportDebug
+Wrote HTML report to file:///workspace/scratch/c53731def2fc/auralis/core-playback/build/reports/lint-results-debug.html
+
+> Task :core-playback:lintDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :app:lintAnalyzeDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///workspace/scratch/c53731def2fc/auralis/app/build/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+w: Detected multiple Kotlin daemon sessions at 
+Persisted dependency lock state for buildscript of root project 'Auralis'
+Persisted dependency lock state for project ':app'
+Persisted dependency lock state for project ':core-model'
+Persisted dependency lock state for project ':core-playback'
+
+BUILD SUCCESSFUL in 2m 12s
+100 actionable tasks: 95 executed, 5 up-to-date

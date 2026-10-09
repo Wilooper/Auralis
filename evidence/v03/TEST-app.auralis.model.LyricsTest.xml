@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.model.LyricsTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-07T15:03:32" hostname="846271439cf0" time="0.086">
+  <properties/>
+  <testcase name="ttmlRelativeOffsetsAndPlainParagraphs" classname="app.auralis.model.LyricsTest" time="0.038"/>
+  <testcase name="audioFolderFilteringAcceptsCodecExtensionsAndProviderMime" classname="app.auralis.model.LyricsTest" time="0.0"/>
+  <testcase name="usltSupportsUtf16DescriptorAndInheritedByteOrder" classname="app.auralis.model.LyricsTest" time="0.002"/>
+  <testcase name="xmlEntitiesAndOversizedTextAreRejected" classname="app.auralis.model.LyricsTest" time="0.03"/>
+  <testcase name="syltUtf8WordsAndNewlines" classname="app.auralis.model.LyricsTest" time="0.003"/>
+  <testcase name="plainUnicodeHasNoInventedTimestamps" classname="app.auralis.model.LyricsTest" time="0.001"/>
+  <testcase name="syltRejectsTruncationAndBackwardsClock" classname="app.auralis.model.LyricsTest" time="0.0"/>
+  <testcase name="outOfOrderWordsFallBackToLineSync" classname="app.auralis.model.LyricsTest" time="0.0"/>
+  <testcase name="repeatedLineTagsShiftTheirWordClocks" classname="app.auralis.model.LyricsTest" time="0.003"/>
+  <testcase name="enhancedLrcKeepsWordsAndEndMarkers" classname="app.auralis.model.LyricsTest" time="0.0"/>
+  <testcase name="ttmlWordSpansRespectEndTimes" classname="app.auralis.model.LyricsTest" time="0.005"/>
+  <testcase name="syltUtf16AndFrameTimeUnits" classname="app.auralis.model.LyricsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

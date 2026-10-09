@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.model.EmbeddedTagsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-07T14:01:25" hostname="846271439cf0" time="0.074">
+  <properties/>
+  <testcase name="flacVorbisCommentsExposeWordLyrics" classname="app.auralis.model.EmbeddedTagsTest" time="0.063"/>
+  <testcase name="mp4StandardAndFreeformLyricsAtoms" classname="app.auralis.model.EmbeddedTagsTest" time="0.003"/>
+  <testcase name="hugeAudioPayloadIsSkippedRatherThanCopied" classname="app.auralis.model.EmbeddedTagsTest" time="0.002"/>
+  <testcase name="oggVorbisAndOpusComments" classname="app.auralis.model.EmbeddedTagsTest" time="0.001"/>
+  <testcase name="continuedOggPacketsAreJoined" classname="app.auralis.model.EmbeddedTagsTest" time="0.0"/>
+  <testcase name="id3InMp3WavAiffAndDsfReachesDecoder" classname="app.auralis.model.EmbeddedTagsTest" time="0.001"/>
+  <testcase name="malformedSizesReturnWarningsWithoutOutOfBoundsReads" classname="app.auralis.model.EmbeddedTagsTest" time="0.0"/>
+  <testcase name="apeTailAfterAudioAndBeforeId3v1" classname="app.auralis.model.EmbeddedTagsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

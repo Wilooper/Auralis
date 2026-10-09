@@ -1,0 +1,24 @@
+{
+  "apiVersion": 1,
+  "id": "org.community.gallery",
+  "name": "Rose gallery",
+  "version": "1.0.0",
+  "capabilities": [
+    "skin.apply"
+  ],
+  "origins": [],
+  "skin": {
+    "primary": "#FF929D",
+    "background": "#140D13",
+    "surface": "#291B25",
+    "text": "#FFF6FB",
+    "muted": "#D3BAC9",
+    "textScale": 1,
+    "rowHeight": 80,
+    "cornerRadius": 24,
+    "artworkSize": 64,
+    "layout": "covers",
+    "font": "serif",
+    "atmosphere": false
+  }
+}

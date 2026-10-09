@@ -1,0 +1,15 @@
+{
+  "apiVersion": 1,
+  "id": "org.community.iframe",
+  "name": "Web music embed",
+  "version": "1.0.0",
+  "capabilities": [
+    "web.embed"
+  ],
+  "origins": [
+    "https://music.example.com"
+  ],
+  "web": {
+    "url": "https://music.example.com/embed/song"
+  }
+}

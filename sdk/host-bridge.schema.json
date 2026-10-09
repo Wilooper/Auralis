@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Auralis in-process host bridge request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "requestId",
+    "channel",
+    "mode",
+    "operation"
+  ],
+  "properties": {
+    "apiVersion": {
+      "const": 1
+    },
+    "requestId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+    },
+    "channel": {
+      "enum": [
+        "catalog.read",
+        "stream.play",
+        "party.session",
+        "web.embed",
+        "skin.apply"
+      ]
+    },
+    "mode": {
+      "enum": [
+        "foreground",
+        "playback",
+        "party",
+        "web",
+        "appearance"
+      ]
+    },
+    "operation": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "catalog.read"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mode": {
+            "const": "foreground"
+          },
+          "operation": {
+            "enum": [
+              "search"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "stream.play"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mode": {
+            "const": "playback"
+          },
+          "operation": {
+            "enum": [
+              "prepare"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "party.session"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mode": {
+            "const": "party"
+          },
+          "operation": {
+            "enum": [
+              "request"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "web.embed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mode": {
+            "const": "web"
+          },
+          "operation": {
+            "enum": [
+              "describe"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "channel": {
+            "const": "skin.apply"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mode": {
+            "const": "appearance"
+          },
+          "operation": {
+            "enum": [
+              "describe"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

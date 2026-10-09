@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.model.LibraryModelTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-08T11:39:47" hostname="273f13c551bc" time="0.015">
+  <properties/>
+  <testcase name="fileIdentityMatchesAcrossSafAndMediaStoreVolumes" classname="app.auralis.model.LibraryModelTest" time="0.001"/>
+  <testcase name="folderMatchingDoesNotIncludeSiblingWithSimilarPrefix" classname="app.auralis.model.LibraryModelTest" time="0.0"/>
+  <testcase name="hashesAreStableAndSafeForArtworkPaths" classname="app.auralis.model.LibraryModelTest" time="0.0"/>
+  <testcase name="searchNormalizationKeepsHindiAndEscapesSqlWildcards" classname="app.auralis.model.LibraryModelTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

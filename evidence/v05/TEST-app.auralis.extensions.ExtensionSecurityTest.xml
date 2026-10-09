@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.extensions.ExtensionSecurityTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T12:13:25" hostname="273f13c551bc" time="0.359">
+  <properties/>
+  <testcase name="originBoundaryRejectsLookalikesCredentialsHttpAndPorts" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.019"/>
+  <testcase name="safeSkinRejectsUnreadableColorsAndExtremeLayout" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.019"/>
+  <testcase name="scriptsAndNativeCodeCannotBeImported" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.018"/>
+  <testcase name="registryCapacityAndInputStreamSizeAreBounded" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.047"/>
+  <testcase name="installsDisabledAndPartialGrantsAreEnforced" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.029"/>
+  <testcase name="parsingBoundsBytesDepthAndTrailingContent" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.021"/>
+  <testcase name="disableAndUninstallInvokeRevocationAndSurviveRestart" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.069"/>
+  <testcase name="remoteUrlsStayOpaqueAndRequireActiveStreamGrant" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.042"/>
+  <testcase name="unknownVersionsAndContributionCapabilitiesAreRejected" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.018"/>
+  <testcase name="updatesDisableAndInvalidatePreviouslyIssuedRevision" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.023"/>
+  <testcase name="publishedSdkExamplesAreAcceptedByAndroid" classname="app.auralis.extensions.ExtensionSecurityTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

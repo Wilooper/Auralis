@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.model.ModelTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-07T12:52:01" hostname="9c24ab53d196" time="0.043">
+  <properties/>
+  <testcase name="lrcRejectsInvalidSecondsAndIgnoresMetadata" classname="app.auralis.model.ModelTest" time="0.028"/>
+  <testcase name="emptyLyricsHaveNoActiveLine" classname="app.auralis.model.ModelTest" time="0.0"/>
+  <testcase name="cancelAndRestartCannotCommitAnOldFade" classname="app.auralis.model.ModelTest" time="0.0"/>
+  <testcase name="fadeRejectsZeroDuration" classname="app.auralis.model.ModelTest" time="0.001"/>
+  <testcase name="fadeEndpointsAndClamping" classname="app.auralis.model.ModelTest" time="0.0"/>
+  <testcase name="lrcOffsetAndSeekUseTheSameClock" classname="app.auralis.model.ModelTest" time="0.01"/>
+  <testcase name="crossfadeWaitsForIncomingAndFreezesWhilePaused" classname="app.auralis.model.ModelTest" time="0.0"/>
+  <testcase name="lrcSupportsMultipleTagsAndFractionWidths" classname="app.auralis.model.ModelTest" time="0.001"/>
+  <testcase name="fadeHasHeadroomAndIsMonotonic" classname="app.auralis.model.ModelTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

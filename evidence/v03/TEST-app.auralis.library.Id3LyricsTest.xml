@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.library.Id3LyricsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-07T15:06:58" hostname="846271439cf0" time="0.103">
+  <properties/>
+  <testcase name="actualId3DecoderExtractsPlainAndEnhancedUslt" classname="app.auralis.library.Id3LyricsTest" time="0.077"/>
+  <testcase name="actualId3DecoderHandlesTxxxLyricsAndIgnoresOtherTags" classname="app.auralis.library.Id3LyricsTest" time="0.003"/>
+  <testcase name="playableWavFixturesDecodeThroughContainerAndActualId3Reader" classname="app.auralis.library.Id3LyricsTest" time="0.019"/>
+  <testcase name="actualId3DecoderPassesSyltBinaryFrameToWordParser" classname="app.auralis.library.Id3LyricsTest" time="0.001"/>
+  <testcase name="malformedId3ReturnsNoLyrics" classname="app.auralis.library.Id3LyricsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

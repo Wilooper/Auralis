@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.library.MediaIndexTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T12:13:29" hostname="273f13c551bc" time="0.518">
+  <properties/>
+  <testcase name="mediaStoreNotificationAddsNewDownloadToSavedFolderWithoutReimport" classname="app.auralis.library.MediaIndexTest" time="0.475"/>
+  <testcase name="permissionDeniedDoesNotQueryAndroidsMusicLibrary" classname="app.auralis.library.MediaIndexTest" time="0.02"/>
+  <testcase name="indexedMetadataIsReadWithoutOpeningAudioAndRestrictedToChosenFolder" classname="app.auralis.library.MediaIndexTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

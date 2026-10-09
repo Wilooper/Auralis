@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.library.LibraryPersistenceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T12:13:25" hostname="273f13c551bc" time="3.517">
+  <properties/>
+  <testcase name="aChangedFileInvalidatesCachedMetadata" classname="app.auralis.library.LibraryPersistenceTest" time="1.447"/>
+  <testcase name="incrementalAddAndDeletionPreserveOtherFolderMembership" classname="app.auralis.library.LibraryPersistenceTest" time="0.06"/>
+  <testcase name="repeatedScansKeepEnrichedMetadataAndRecentlyPlayedHistory" classname="app.auralis.library.LibraryPersistenceTest" time="0.037"/>
+  <testcase name="schemaOneUpgradeKeepsLibraryQueueAndHistory" classname="app.auralis.library.LibraryPersistenceTest" time="0.052"/>
+  <testcase name="tenThousandTracksWarmBrowseSearchAndDeltaBenchmark" classname="app.auralis.library.LibraryPersistenceTest" time="1.719"/>
+  <testcase name="searchesUseLiteralPercentUnderscoreAndArtistAlbumFilters" classname="app.auralis.library.LibraryPersistenceTest" time="0.024"/>
+  <testcase name="mediaIndexReconciliationKeepsUnindexedSafFiles" classname="app.auralis.library.LibraryPersistenceTest" time="0.026"/>
+  <testcase name="queueAndPositionRestoreWithoutAutoplay" classname="app.auralis.library.LibraryPersistenceTest" time="0.04"/>
+  <testcase name="reopenRestoresFoldersSongsAndSearchWithoutAFileScan" classname="app.auralis.library.LibraryPersistenceTest" time="0.029"/>
+  <testcase name="analysisCacheInvalidatesChangedFilesAndHistoryCanClear" classname="app.auralis.library.LibraryPersistenceTest" time="0.056"/>
+  <testcase name="favoritesSurviveReopenMetadataRefreshAndFolderOverlap" classname="app.auralis.library.LibraryPersistenceTest" time="0.027"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

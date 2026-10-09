@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "languages": [
+    "hi"
+  ],
+  "requiredLabels": [
+    "sad",
+    "love"
+  ],
+  "preferredLabels": [],
+  "excludedGenres": [],
+  "durationTargetSeconds": 2400,
+  "trackCount": null,
+  "strictness": "explicit-labels-only",
+  "maxTracksPerArtist": 2,
+  "repeatWindowTracks": 20,
+  "seedTrackRefs": [],
+  "journey": null,
+  "persistMode": "temporary-session",
+  "illustrative": true
+}

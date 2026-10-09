@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "org.example.selfhosted",
+  "version": "0.1.0",
+  "distribution": "bundled",
+  "sdk": {
+    "minMajor": 1,
+    "maxMajor": 1
+  },
+  "capabilities": [
+    "browse",
+    "search",
+    "metadata",
+    "stream",
+    "artwork"
+  ],
+  "configuredHosts": [],
+  "networkPolicy": "user-configured-hosts",
+  "dataAccess": [
+    "source-credentials",
+    "source-library"
+  ],
+  "license": "UNSELECTED",
+  "illustrative": true
+}

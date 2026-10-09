@@ -1,0 +1,139 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :core-model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-model:processResources NO-SOURCE
+> Task :core-model:processTestResources NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :core-playback:preBuild UP-TO-DATE
+> Task :core-playback:preDebugBuild UP-TO-DATE
+> Task :core-playback:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :core-playback:generateDebugResValues UP-TO-DATE
+> Task :core-playback:generateDebugResources UP-TO-DATE
+> Task :core-playback:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :core-playback:extractDeepLinksDebug UP-TO-DATE
+> Task :core-playback:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :core-playback:compileDebugLibraryResources UP-TO-DATE
+> Task :core-playback:parseDebugLocalResources UP-TO-DATE
+> Task :core-playback:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :core-playback:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-playback:javaPreCompileDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :core-playback:mergeDebugShaders UP-TO-DATE
+> Task :core-playback:compileDebugShaders NO-SOURCE
+> Task :core-playback:generateDebugAssets UP-TO-DATE
+> Task :core-playback:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig UP-TO-DATE
+> Task :core-playback:mergeDebugJniLibFolders UP-TO-DATE
+> Task :core-playback:mergeDebugNativeLibs NO-SOURCE
+> Task :core-playback:stripDebugDebugSymbols NO-SOURCE
+> Task :core-playback:copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :core-playback:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :core-playback:prepareDebugArtProfile UP-TO-DATE
+> Task :core-playback:prepareLintJarForPublish UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :core-playback:writeDebugLintModelMetadata UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :core-playback:extractProguardFiles UP-TO-DATE
+> Task :core-playback:preDebugAndroidTestBuild UP-TO-DATE
+> Task :core-playback:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :core-playback:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :core-model:compileKotlin
+> Task :app:mergeExtDexDebug
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :core-model:compileJava NO-SOURCE
+> Task :core-model:classes UP-TO-DATE
+> Task :core-model:jar
+> Task :core-model:compileTestKotlin
+> Task :core-model:compileTestJava NO-SOURCE
+> Task :core-model:testClasses UP-TO-DATE
+> Task :core-playback:compileDebugKotlin
+> Task :core-model:test
+> Task :core-playback:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-playback:bundleLibRuntimeToJarDebug
+> Task :core-playback:bundleLibCompileToJarDebug
+> Task :core-playback:processDebugJavaRes UP-TO-DATE
+> Task :core-playback:extractDebugAnnotations
+> Task :core-playback:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :core-playback:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :core-playback:mergeDebugJavaResource UP-TO-DATE
+> Task :core-playback:syncDebugLibJars
+> Task :core-playback:bundleDebugLocalLintAar
+> Task :core-playback:createFullJarDebug
+> Task :app:compileDebugKotlin
+> Task :core-playback:generateDebugLintModel
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:generateDebugAndroidTestLintModel
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:testDebugUnitTest
+> Task :app:generateDebugLintReportModel
+> Task :app:generateDebugUnitTestLintModel
+> Task :app:lintAnalyzeDebugAndroidTest
+> Task :app:lintAnalyzeDebugUnitTest
+> Task :core-playback:generateDebugAndroidTestLintModel
+> Task :core-playback:generateDebugUnitTestLintModel
+> Task :core-playback:lintAnalyzeDebugAndroidTest
+> Task :core-playback:lintAnalyzeDebugUnitTest
+> Task :core-playback:generateDebugLintReportModel
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugJavaResource
+> Task :core-playback:bundleLibRuntimeToDirDebug
+> Task :app:mergeLibDexDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :core-playback:copyDebugJniLibsProjectOnly UP-TO-DATE
+> Task :app:mergeDebugNativeLibs
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :core-playback:lintAnalyzeDebug
+> Task :app:packageDebug
+
+> Task :core-playback:lintReportDebug
+Wrote HTML report to file:///workspace/scratch/c53731def2fc/auralis/core-playback/build/reports/lint-results-debug.html
+
+> Task :core-playback:lintDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :app:lintAnalyzeDebug
+
+> Task :app:lintReportDebug
+Wrote HTML report to file:///workspace/scratch/c53731def2fc/auralis/app/build/reports/lint-results-debug.html
+
+> Task :app:lintDebug
+
+BUILD SUCCESSFUL in 2m 47s
+99 actionable tasks: 41 executed, 58 up-to-date

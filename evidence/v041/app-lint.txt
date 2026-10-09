@@ -1,0 +1,105 @@
+/workspace/scratch/c53731def2fc/auralis/gradle/wrapper/gradle-wrapper.properties:3: Warning: A newer version of Gradle than 8.11.1 is available: 8.14.5 [AndroidGradlePluginVersion]
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AndroidGradlePluginVersion":
+   This detector looks for usage of the Android Gradle Plugin where the
+   version you are using is not the current stable release. Using older
+   versions is fine, and there are cases where you deliberately want to stick
+   with an older version. However, you may simply not be aware that a more
+   recent version is available, and that is what this lint check helps find.
+
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/ArtworkProvider.kt:68: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            retriever.setDataSource(context, Uri.parse(track.uri))
+                                             ~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/ArtworkProvider.kt:73: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            context.contentResolver.openInputStream(Uri.parse(art))?.use { stream ->
+                                                    ~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/ArtworkProvider.kt:88: Warning: Use the KTX extension function Bitmap.scale instead? [UseKtx]
+        val resized = Bitmap.createScaledBitmap(bitmap, (bitmap.width * scale).toInt().coerceAtLeast(1), (bitmap.height * scale).toInt().coerceAtLeast(1), true)
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/AuralisTheme.kt:50: Warning: Use the KTX extension function Bitmap.scale instead? [UseKtx]
+        val small = Bitmap.createScaledBitmap(input, 64, 64, true)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/LibraryRepository.kt:119: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(source.uri), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+                                                                              ~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/LibraryRepository.kt:147: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                        val scan = FolderScanner(context).scan(Uri.parse(source.uri)) { batch, count ->
+                                                               ~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/LibraryRepository.kt:167: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            val uris = database.sources().filter { it.kind == "folder" }.mapNotNull { Uri.parse(it.uri).authority }.toSet().map { "content://$it" }.toMutableSet()
+                                                                                      ~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/LibraryRepository.kt:175: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                runCatching { context.contentResolver.registerContentObserver(Uri.parse(uri), true, observer) }.onSuccess { observed.add(uri) }
+                                                                              ~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/LibraryRepository.kt:190: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                        retriever.setDataSource(context, Uri.parse(track.uri))
+                                                         ~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/MainActivity.kt:152: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                    settings -> SettingsScreen(state, model, home, library, { changingFolder = null; folderPicker.launch(null) }, { audioPicker.launch(arrayOf("*/*")) }, { musicPermission.launch(AudioPermission.name) }, { source -> changingFolder = source.uri; folderPicker.launch(android.net.Uri.parse(source.uri)) })
+                                                                                                                                                                                                                                                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/PlaybackCheckpoint.kt:21: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                row.optString("art").takeIf { it.isNotBlank() }?.let { metadata.setArtworkUri(android.net.Uri.parse(it)) }
+                                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/c53731def2fc/auralis/app/src/main/kotlin/app/auralis/library/SongAnalyzer.kt:20: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+            extractor.setDataSource(context, Uri.parse(track.uri), null)
+                                             ~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+0 errors, 13 warnings

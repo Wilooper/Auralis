@@ -1,0 +1,23 @@
+.gradle/
+.kotlin/
+.idea/
+**/build/
+local.properties
+*.jks
+*.keystore
+
+# Developer caches, credentials and packaged artifacts
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.apk
+*.aab
+*.zip
+.DS_Store

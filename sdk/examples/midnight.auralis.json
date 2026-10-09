@@ -1,0 +1,24 @@
+{
+  "apiVersion": 1,
+  "id": "org.community.midnight",
+  "name": "Midnight compact",
+  "version": "1.0.0",
+  "capabilities": [
+    "skin.apply"
+  ],
+  "origins": [],
+  "skin": {
+    "primary": "#8FD8FF",
+    "background": "#080D18",
+    "surface": "#142034",
+    "text": "#F4F8FF",
+    "muted": "#B5C4DD",
+    "textScale": 1.05,
+    "rowHeight": 76,
+    "cornerRadius": 10,
+    "artworkSize": 48,
+    "layout": "compact",
+    "font": "sans",
+    "atmosphere": false
+  }
+}

@@ -1,0 +1,29 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <application android:name=".AuralisApplication" android:allowBackup="false" android:usesCleartextTraffic="false" android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules" android:label="Auralis"
+        android:icon="@drawable/ic_auralis" android:theme="@style/Theme.Auralis"
+        android:supportsRtl="true">
+        <provider android:name=".library.ArtworkProvider" android:authorities="${applicationId}.artwork"
+            android:exported="false" android:grantUriPermissions="true" />
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- Media3 needs system controllers; onConnect rejects untrusted external apps. -->
+        <service android:name=".PlaybackService" android:exported="true" tools:ignore="ExportedService"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

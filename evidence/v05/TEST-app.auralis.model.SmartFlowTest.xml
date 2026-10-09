@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.model.SmartFlowTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-08T11:39:47" hostname="273f13c551bc" time="0.03">
+  <properties/>
+  <testcase name="flowsMoveGraduallyWithoutDuplicatesAndKeepSeed" classname="app.auralis.model.SmartFlowTest" time="0.006"/>
+  <testcase name="sequentialOrderHandlesEmptySingleAndLastTrack" classname="app.auralis.model.SmartFlowTest" time="0.004"/>
+  <testcase name="missingOrSilentProfilesAreExcludedAndLimitHonored" classname="app.auralis.model.SmartFlowTest" time="0.001"/>
+  <testcase name="shuffleVisitsEachSongOnceAndRepeatWrapsAndPreviousRetraces" classname="app.auralis.model.SmartFlowTest" time="0.0"/>
+  <testcase name="djEnvelopeHasSofterEntranceAndBoundedOverlap" classname="app.auralis.model.SmartFlowTest" time="0.0"/>
+  <testcase name="descriptorsAreBoundedForMalformedSamples" classname="app.auralis.model.SmartFlowTest" time="0.001"/>
+  <testcase name="analyzerDistinguishesAmplitudeAndDetectsSyntheticBeat" classname="app.auralis.model.SmartFlowTest" time="0.018"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

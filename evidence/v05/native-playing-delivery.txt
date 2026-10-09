@@ -1,0 +1,46 @@
+MEDIA SESSION SERVICE (dumpsys media_session)
+
+2 sessions listeners.
+Global priority session is com.android.server.telecom/HeadsetMediaButton (userId=0)
+  HeadsetMediaButton com.android.server.telecom/HeadsetMediaButton (userId=0)
+    ownerPid=1817, ownerUid=1000, userId=0
+    package=com.android.server.telecom
+    launchIntent=null
+    mediaButtonReceiver=null
+    active=false
+    flags=65537
+    rating type=0
+    controllers: 0
+    state=null
+    audioAttrs=AudioAttributes: usage=USAGE_VOICE_COMMUNICATION content=CONTENT_TYPE_SPEECH flags=0x0 tags= bundle=null
+    volumeType=1, controlType=2, max=0, current=0
+    metadata:size=0, description=null
+    queueTitle=null, size=0
+User Records:
+Record for full_user=0
+  Volume key long-press listener: null
+  Volume key long-press listener package: 
+  Media key listener: null
+  Media key listener package: 
+  Callback: null
+  Last MediaButtonReceiver: PendingIntent{4412c33: PendingIntentRecord{da98bf0 app.auralis startForegroundService}}
+  Restored MediaButtonReceiver: null
+  Media button session is app.auralis/androidx.media3.session.id. (userId=0)
+  Sessions Stack - have 1 sessions:
+    androidx.media3.session.id. app.auralis/androidx.media3.session.id. (userId=0)
+      ownerPid=3828, ownerUid=10067, userId=0
+      package=app.auralis
+      launchIntent=PendingIntent{573e569: PendingIntentRecord{36538b6 app.auralis startActivity (whitelist: ba9d524:+30s0ms)}}
+      mediaButtonReceiver=PendingIntent{4412c33: PendingIntentRecord{da98bf0 app.auralis startForegroundService}}
+      active=true
+      flags=7
+      rating type=0
+      controllers: 2
+      state=PlaybackState {state=3, position=3549, buffered position=3550, speed=1.0, updated=1550970, actions=3145707, custom actions=[], active item id=0, error=null}
+      audioAttrs=AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_MUSIC flags=0x0 tags= bundle=null
+      volumeType=1, controlType=2, max=0, current=0
+      metadata:size=6, description=City-Lights, Self-hosted library, Internet · org.fixture.music
+      queueTitle=null, size=3
+
+Audio playback (lastly played comes first)
+  uid=10067 packages=app.auralis 

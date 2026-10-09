@@ -1,0 +1,329 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Auralis community provider and party API",
+    "version": "1.0.0",
+    "description": "Implement on your own HTTPS server. The Android host bridge is not an externally exposed HTTP API."
+  },
+  "servers": [
+    {
+      "url": "https://music.example.com"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/catalog": {
+      "get": {
+        "operationId": "searchCatalog",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid bearer token"
+          },
+          "429": {
+            "description": "Request limit"
+          }
+        }
+      }
+    },
+    "/v1/audio/{trackId}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "trackId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getAudio",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Direct audio bytes, no playlist or redirects",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/flac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/ogg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/wav": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Byte range",
+            "headers": {
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Invalid range"
+          }
+        }
+      },
+      "head": {
+        "operationId": "headAudio",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Direct audio bytes, no playlist or redirects",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/flac": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/ogg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "audio/wav": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Byte range",
+            "headers": {
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Invalid range"
+          }
+        }
+      }
+    },
+    "/v1/party": {
+      "post": {
+        "operationId": "partyRequest",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Server-hosted shared queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Unknown session"
+          },
+          "429": {
+            "description": "Session/queue limit"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Track": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "streamUrl"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "artist": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "streamUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048
+          },
+          "format": {
+            "enum": [
+              "mp3",
+              "flac",
+              "wav",
+              "ogg"
+            ],
+            "default": "mp3"
+          }
+        }
+      },
+      "Catalog": {
+        "type": "object",
+        "required": [
+          "tracks"
+        ],
+        "properties": {
+          "tracks": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/Track"
+            }
+          }
+        }
+      },
+      "PartyRequest": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "enum": [
+              "create",
+              "join",
+              "state",
+              "enqueue",
+              "leave"
+            ]
+          },
+          "session": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "trackId": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      },
+      "PartyResponse": {
+        "type": "object",
+        "required": [
+          "session",
+          "queue"
+        ],
+        "properties": {
+          "session": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "queue": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

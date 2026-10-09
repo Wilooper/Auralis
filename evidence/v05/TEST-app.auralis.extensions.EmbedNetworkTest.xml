@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.extensions.EmbedNetworkTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-08T12:13:25" hostname="273f13c551bc" time="0.085">
+  <properties/>
+  <testcase name="closingEmbedInvalidatesOutstandingResourceStreams" classname="app.auralis.extensions.EmbedNetworkTest" time="0.032"/>
+  <testcase name="redirectsAreDeniedAndResourcesCarryConstrainedCsp" classname="app.auralis.extensions.EmbedNetworkTest" time="0.033"/>
+  <testcase name="undeclaredOriginsAndPostNeverReachNetwork" classname="app.auralis.extensions.EmbedNetworkTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

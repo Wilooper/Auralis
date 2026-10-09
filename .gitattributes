@@ -1,0 +1,9 @@
+* text=auto
+*.sh text eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.png binary
+*.wav binary
+*.mp3 binary
+*.jar binary
+evidence/** -text

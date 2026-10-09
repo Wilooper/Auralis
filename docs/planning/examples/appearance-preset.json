@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "example.mixed-original",
+  "name": "Artwork focus with compact controls",
+  "slots": {
+    "home": "shelves.v1",
+    "artwork": "large-square.v1",
+    "fullPlayer": "artwork-focus.v1",
+    "miniPlayer": "compact-bar.v1",
+    "queue": "drawer.v1",
+    "lyrics": "line-scroll.v1",
+    "navigation": "bottom-tabs.v1"
+  },
+  "tokens": {
+    "background": "#10131B",
+    "surface": "#1B2130",
+    "accent": "#A8C7FA",
+    "text": "#F4F6FA",
+    "radiusDp": 20,
+    "textScale": 1,
+    "spacing": "comfortable",
+    "motion": "reduced",
+    "blurEnabled": false
+  },
+  "illustrative": true
+}

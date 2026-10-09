@@ -1,0 +1,121 @@
+{
+  "project": "Auralis",
+  "milestone": "V5 SDK foundation",
+  "date": "2026-10-08",
+  "version": "0.5.0-dev",
+  "deviceGate": "user_confirmed_0.1_basic_file_playback; broader_device_checks_pending",
+  "update": "File-based declarative extension SDK, granular grants/revocation, bounded HTTPS provider and audio bridge, server party queue APIs, restricted iframe mode and editable skins implemented. 80 Android tests and 7 SDK/server tests pass; emulator HTTPS playback/import/appearance smoke checks pass. Physical-device stress and independent security review remain.",
+  "statuses": {
+    "done": "Acceptance evidence recorded",
+    "implemented_unverified": "Source compiles; required device evidence is missing",
+    "blocked": "Acceptance depends on unfinished device verification"
+  },
+  "tasks": [
+    {
+      "id": "V050",
+      "title": "Community extension SDK and permission-controlled internet bridge",
+      "status": "implemented_unverified",
+      "evidence": [
+        "V5-SDK.md",
+        "sdk/README.md",
+        "sdk/openapi.json",
+        "evidence/v05/build.log",
+        "evidence/v05/https-native-session.txt"
+      ],
+      "missing": "Physical-device stress and real third-party embed/provider compatibility; independent security review before a public store"
+    },
+    {
+      "id": "V041",
+      "title": "V4 controls, navigation and gradual playlists",
+      "status": "implemented_unverified",
+      "evidence": [
+        "V4-FINISH.md",
+        "evidence/v041/verification.log"
+      ],
+      "missing": "Physical-device decoder/analysis coverage and audible crossfade quality"
+    },
+    {
+      "id": "U001",
+      "title": "Default discovery and listening interface",
+      "status": "implemented_unverified",
+      "evidence": [
+        "app/src/main/kotlin/app/auralis/AuralisTheme.kt",
+        "app/src/main/kotlin/app/auralis/PlayerScreens.kt",
+        "UI-DESIGN.md",
+        "BUILD-RESULTS.md"
+      ],
+      "missing": "Physical-phone portrait/landscape, font-size, frame timing and battery review"
+    },
+    {
+      "id": "L001",
+      "title": "Saved library, automatic discovery and browse performance",
+      "status": "implemented_unverified",
+      "evidence": [
+        "app/src/main/kotlin/app/auralis/library/LibraryRepository.kt",
+        "app/src/main/kotlin/app/auralis/HomeScreen.kt",
+        "evidence/library-host-benchmark.json",
+        "LIBRARY-PERFORMANCE.md"
+      ],
+      "missing": "Physical-device cold-open latency, OEM download notifications, artwork and process-death recovery checks"
+    },
+    {
+      "id": "P001",
+      "title": "Pin tools, native artifact and license provenance",
+      "status": "done",
+      "evidence": [
+        "build.gradle.kts",
+        "gradle/wrapper/gradle-wrapper.properties",
+        "THIRD-PARTY.md",
+        "BUILD-RESULTS.md"
+      ],
+      "note": "Public binary-release license compliance is a separate unfinished gate."
+    },
+    {
+      "id": "P002",
+      "title": "Content-URI playback prototype",
+      "status": "implemented_unverified",
+      "evidence": [
+        "core-playback/src/main/kotlin/app/auralis/playback/VlcEngine.kt"
+      ],
+      "missing": "Codec corpus playback and seeking on device"
+    },
+    {
+      "id": "P003",
+      "title": "Session and playback service",
+      "status": "implemented_unverified",
+      "evidence": [
+        "app/src/main/kotlin/app/auralis/PlaybackService.kt",
+        "core-playback/src/main/kotlin/app/auralis/playback/VlcSessionPlayer.kt"
+      ],
+      "missing": "Notification, headset, focus and screen-off tests"
+    },
+    {
+      "id": "P004",
+      "title": "Two-player crossfade experiment",
+      "status": "implemented_unverified",
+      "evidence": [
+        "core-model/src/test/kotlin/app/auralis/model/ModelTest.kt",
+        "core-playback/src/main/kotlin/app/auralis/playback/VlcEngine.kt"
+      ],
+      "missing": "Recorded overlap, timing and clipping evaluation"
+    },
+    {
+      "id": "P005",
+      "title": "Device lifecycle and baseline performance",
+      "status": "blocked",
+      "evidence": [
+        "DEVICE-CHECKLIST.md"
+      ],
+      "missing": "A physical Android test device"
+    },
+    {
+      "id": "P006",
+      "title": "Final engine and transition decision",
+      "status": "blocked",
+      "evidence": [
+        "M0-DECISION.md"
+      ],
+      "missing": "P005 acceptance; the decision is provisional"
+    }
+  ]
+}

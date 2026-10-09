@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1120" viewBox="0 0 1440 1120" role="img" aria-labelledby="title desc"><title id="title">Advanced Android music player implementation mind map</title><desc id="desc">Five implementation branches: playback, experience, intelligence, sources and sharing, community and quality.</desc><rect width="1440" height="1120" fill="#101522"/>
+<text x="55" y="71" font-family="DejaVu Sans,sans-serif" font-size="36" font-weight="700" fill="#EDF3FC">Advanced Android Music Player</text>
+<text x="55" y="109" font-family="DejaVu Sans,sans-serif" font-size="22" font-weight="400" fill="#A7B4CC">Kotlin + Compose + LibVLC  |  Implementation map v0.1</text>
+<polyline points="345,567 385,567 385,220 440,220" fill="none" stroke="#79B6FF" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="750,220 790,220 790,227 830,227" fill="none" stroke="#79B6FF" stroke-width="3" stroke-linejoin="round"/>
+<rect x="440" y="165" width="310" height="112" rx="20" fill="#192336" stroke="#79B6FF" stroke-width="2"/>
+<text x="462" y="206" font-family="DejaVu Sans,sans-serif" font-size="22" font-weight="700" fill="#79B6FF">Playback foundation</text>
+<text x="462" y="245" font-family="DejaVu Sans,sans-serif" font-size="18" font-weight="400" fill="#A7B4CC">M0 / M1</text>
+<rect x="830" y="160" width="550" height="135" rx="20" fill="#171F30" stroke="#31415D" stroke-width="2"/>
+<text x="852" y="194" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">LibVLC + Android media session</text>
+<text x="852" y="229" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Formats + crossfade prototype</text>
+<text x="852" y="264" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Queue recovery + audio focus</text>
+<polyline points="345,567 385,567 385,394 440,394" fill="none" stroke="#BD9CFF" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="750,394 790,394 790,401 830,401" fill="none" stroke="#BD9CFF" stroke-width="3" stroke-linejoin="round"/>
+<rect x="440" y="339" width="310" height="112" rx="20" fill="#192336" stroke="#BD9CFF" stroke-width="2"/>
+<text x="462" y="380" font-family="DejaVu Sans,sans-serif" font-size="22" font-weight="700" fill="#BD9CFF">Personal experience</text>
+<text x="462" y="419" font-family="DejaVu Sans,sans-serif" font-size="18" font-weight="400" fill="#A7B4CC">M1 / M2</text>
+<rect x="830" y="334" width="550" height="135" rx="20" fill="#171F30" stroke="#31415D" stroke-width="2"/>
+<text x="852" y="368" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Independent UI slots + presets</text>
+<text x="852" y="403" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Artwork + local synced lyrics</text>
+<text x="852" y="438" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Mix home, player and mini player</text>
+<polyline points="345,567 385,567 385,568 440,568" fill="none" stroke="#69D3B0" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="750,568 790,568 790,575 830,575" fill="none" stroke="#69D3B0" stroke-width="3" stroke-linejoin="round"/>
+<rect x="440" y="513" width="310" height="112" rx="20" fill="#192336" stroke="#69D3B0" stroke-width="2"/>
+<text x="462" y="554" font-family="DejaVu Sans,sans-serif" font-size="22" font-weight="700" fill="#69D3B0">Local intelligence</text>
+<text x="462" y="593" font-family="DejaVu Sans,sans-serif" font-size="18" font-weight="400" fill="#A7B4CC">M3 / M6</text>
+<rect x="830" y="508" width="550" height="135" rx="20" fill="#171F30" stroke="#31415D" stroke-width="2"/>
+<text x="852" y="542" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Command temporary playlists</text>
+<text x="852" y="577" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Cached similar-track ranking</text>
+<text x="852" y="612" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Optional ML + mood journeys</text>
+<polyline points="345,567 385,567 385,742 440,742" fill="none" stroke="#F7BA72" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="750,742 790,742 790,749 830,749" fill="none" stroke="#F7BA72" stroke-width="3" stroke-linejoin="round"/>
+<rect x="440" y="687" width="310" height="112" rx="20" fill="#192336" stroke="#F7BA72" stroke-width="2"/>
+<text x="462" y="728" font-family="DejaVu Sans,sans-serif" font-size="22" font-weight="700" fill="#F7BA72">Sources and sharing</text>
+<text x="462" y="767" font-family="DejaVu Sans,sans-serif" font-size="18" font-weight="400" fill="#A7B4CC">M4 / M5</text>
+<rect x="830" y="682" width="550" height="135" rx="20" fill="#171F30" stroke="#31415D" stroke-width="2"/>
+<text x="852" y="716" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Local files + self-hosted adapters</text>
+<text x="852" y="751" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">QR / URL browser listening</text>
+<text x="852" y="786" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">LAN first; remote access later</text>
+<polyline points="345,567 385,567 385,916 440,916" fill="none" stroke="#F58FA9" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="750,916 790,916 790,923 830,923" fill="none" stroke="#F58FA9" stroke-width="3" stroke-linejoin="round"/>
+<rect x="440" y="861" width="310" height="112" rx="20" fill="#192336" stroke="#F58FA9" stroke-width="2"/>
+<text x="462" y="900" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="700" fill="#F58FA9">Community and quality</text>
+<text x="462" y="941" font-family="DejaVu Sans,sans-serif" font-size="18" font-weight="400" fill="#A7B4CC">All / M7</text>
+<rect x="830" y="856" width="550" height="135" rx="20" fill="#171F30" stroke="#31415D" stroke-width="2"/>
+<text x="852" y="890" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Versioned extension contracts</text>
+<text x="852" y="925" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Bundled modules; external later</text>
+<text x="852" y="960" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Device, quality and resource gates</text>
+<rect x="55" y="490" width="290" height="155" rx="20" fill="#20365A" stroke="#90BFFF" stroke-width="2"/>
+<text x="78" y="535" font-family="DejaVu Sans,sans-serif" font-size="24" font-weight="700" fill="#EDF3FC">ANDROID PLAYER</text>
+<text x="78" y="576" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#EDF3FC">Original app shell</text>
+<text x="78" y="612" font-family="DejaVu Sans,sans-serif" font-size="18" font-weight="400" fill="#A7B4CC">One playback authority</text>
+<text x="55" y="1085" font-family="DejaVu Sans,sans-serif" font-size="20" font-weight="400" fill="#A7B4CC">First gate: prove playback, background controls and true overlapping crossfade.</text>
+</svg>

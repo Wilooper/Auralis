@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.auralis.extensions.BridgeNetworkTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-08T12:13:22" hostname="273f13c551bc" time="2.416">
+  <properties/>
+  <testcase name="responsesAreBoundedAndNestedJsonIsRejected" classname="app.auralis.extensions.BridgeNetworkTest" time="2.166"/>
+  <testcase name="redirectsNeverFollowAndConnectionsClose" classname="app.auralis.extensions.BridgeNetworkTest" time="0.069"/>
+  <testcase name="streamProxyUsesOpaqueTokenAndRevokesIt" classname="app.auralis.extensions.BridgeNetworkTest" time="0.067"/>
+  <testcase name="catalogOriginAndFormatsAreCheckedBeforePlayback" classname="app.auralis.extensions.BridgeNetworkTest" time="0.037"/>
+  <testcase name="rateBudgetRejectsEleventhRequest" classname="app.auralis.extensions.BridgeNetworkTest" time="0.042"/>
+  <testcase name="versionedEnvelopeRejectsWrongModeAndUnknownOperations" classname="app.auralis.extensions.BridgeNetworkTest" time="0.034"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[[Robolectric] WARN: Android SDK 36 requires Java 21 (have Java 17). Tests won't be run on SDK 36 unless explicitly requested.
+]]></system-err>
+</testsuite>
