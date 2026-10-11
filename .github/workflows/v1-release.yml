@@ -1,0 +1,78 @@
+name: v1 Preview Release
+on:
+  workflow_run:
+    workflows: [Android Checks]
+    types: [completed]
+permissions:
+  contents: read
+concurrency:
+  group: v1-preview-release
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_SHA: ${{ github.event.workflow_run.head_sha }}
+      BUILD_RUN: ${{ github.event.workflow_run.id }}
+    steps:
+      # Only successful push builds from this repository's main branch are eligible.
+      # Never check out or execute source from the triggering run in this write job.
+      - name: Check this is still main
+        id: current
+        run: |
+          current=$(gh api "repos/$GH_REPO/commits/main" --jq .sha)
+          if [[ "$current" == "$BUILD_SHA" ]]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'A newer main commit exists; its successful build will publish v1.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Download verified build assets
+        if: steps.current.outputs.publish == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          name: auralis-debug-apks-${{ github.event.workflow_run.id }}
+          path: incoming
+      - name: Verify and prepare the release
+        if: steps.current.outputs.publish == 'true'
+        run: |
+          mapfile -d '' apks < <(find incoming -type f -name '*.apk' -print0)
+          mapfile -d '' manifests < <(find incoming -type f -name 'seekbar-styles.auralis.json' -print0)
+          [[ ${#apks[@]} -ge 1 && ${#manifests[@]} -eq 1 ]] || { echo 'Missing APKs or seek bar extension' >&2; exit 1; }
+          mkdir -p dist
+          cp -- "${apks[@]}" dist/
+          cp -- "${manifests[0]}" dist/Auralis-v1-Seek-Bar-Styles.auralis.json
+          # The build job verified APK signatures and alignment; verify its checksums again.
+          sums=$(find incoming -type f -name SHA256SUMS.txt -print -quit)
+          [[ -n "$sums" ]] || { echo 'Missing APK checksums' >&2; exit 1; }
+          (cd dist && cp "$GITHUB_WORKSPACE/$sums" APK-SHA256SUMS.txt && sha256sum --check --strict APK-SHA256SUMS.txt)
+          printf '%s\n' 'Auralis v1 preview' "Commit: $BUILD_SHA" "Android Checks run: https://github.com/$GH_REPO/actions/runs/$BUILD_RUN" \
+            '' 'Install a suitable APK, then import Auralis-v1-Seek-Bar-Styles.auralis.json in Settings > Extensions & internet. Grant skin.apply and choose Classic, Pill, Segmented or Wave.' \
+            '' 'These APKs use a temporary CI debug key. A differently signed app may need to be uninstalled first; back up settings because uninstalling clears app data. This is a development preview.' > dist/RELEASE-NOTES.md
+          (cd dist && sha256sum -- *.apk *.auralis.json RELEASE-NOTES.md > SHA256SUMS.txt)
+      - name: Publish rolling v1 preview
+        if: steps.current.outputs.publish == 'true'
+        run: |
+          current=$(gh api "repos/$GH_REPO/commits/main" --jq .sha)
+          [[ "$current" == "$BUILD_SHA" ]] || { echo 'Main advanced during preparation; skipping stale release.' >> "$GITHUB_STEP_SUMMARY"; exit 0; }
+          if gh release view v1 >/dev/null 2>&1; then
+            gh release upload v1 dist/*.apk dist/*.auralis.json dist/SHA256SUMS.txt dist/RELEASE-NOTES.md --clobber
+            gh api -X PATCH "repos/$GH_REPO/git/refs/tags/v1" -f sha="$BUILD_SHA" -F force=true >/dev/null
+            gh release edit v1 --title 'Auralis v1 preview' --notes-file dist/RELEASE-NOTES.md --prerelease=true --latest=false
+          else
+            gh release create v1 dist/*.apk dist/*.auralis.json dist/SHA256SUMS.txt dist/RELEASE-NOTES.md \
+              --target "$BUILD_SHA" --title 'Auralis v1 preview' --notes-file dist/RELEASE-NOTES.md --prerelease --latest=false
+          fi
+          printf 'Published [v1](https://github.com/%s/releases/tag/v1) from successful Android build %s.\n' "$GH_REPO" "$BUILD_RUN" >> "$GITHUB_STEP_SUMMARY"

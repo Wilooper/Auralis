@@ -16,16 +16,21 @@ The original workflow assumed `sdkmanager` was on PATH. The shared Android setup
 | Issue and PR triage | New/reopened issues; PR changes | Creates and applies a bounded set of type/area labels; never runs PR code |
 | CI failure reporter | Android Checks completes on main | Maintains one bot-created failure issue; closes it when the current main commit passes |
 | Tagged Release | Push a version tag, manual on a tag | Validates source/version, reruns tests/lint, builds APKs, packages source/SDK/checksums, then publishes a GitHub release |
+| v1 Preview Release | Successful Android Checks on current main | Publishes the verified debug APKs and seek bar extension under the rolling `v1` prerelease tag |
 
 APKs: open the Android Checks run and download `auralis-debug-apks-<run-id>` from Artifacts. Reports and APKs are kept for 14 days. Workflow logs report real failures; none are hidden with `continue-on-error`. CodeQL uploads appear in Security → Code scanning. Dependency Review only checks dependencies GitHub can resolve; it is not a complete security audit.
 
 ## Releases
 
+The rolling [`v1` preview release](https://github.com/Wilooper/Auralis/releases/tag/v1) is created automatically when Android Checks succeeds for the current `main` commit. It uses that run's tested debug APK artifact and includes `Auralis-v1-Seek-Bar-Styles.auralis.json` and checksums. A newer successful main build replaces those preview assets and moves the `v1` tag to that commit. The tag is therefore **mutable**: pin a commit SHA or download and verify checksums if you need an exact preview build. It is not a stable, production-signed release.
+
+Versioned releases remain separate:
+
 1. Finish physical-device and native-license checks. Update `versionName` **and increment** `versionCode` in `app/build.gradle.kts` and commit on main.
 2. Push a version tag matching `versionName`, e.g. `v0.5.0-dev` for `0.5.0-dev`. The tagged commit must be reachable from main.
 3. The Tagged Release workflow runs automatically. A hyphenated version is a development prerelease using debug APKs. A stable version such as `v0.5.0` requires production signing secrets and produces release APKs.
 
-Manual reruns must select an existing version tag, not a branch. Existing releases are never overwritten. If publishing fails after creating a draft, inspect that draft; do not delete or replace a published release merely to retry. No version tag is created automatically on every commit, so normal pushes do not spam Releases.
+Manual Tagged Release reruns must select an existing version tag, not a branch. Existing versioned releases are never overwritten. If publishing fails after creating a draft, inspect that draft; do not delete or replace a published release merely to retry. Normal pushes update only the rolling `v1` preview.
 
 ### Signing: one-time maintainer setup
 
@@ -48,7 +53,7 @@ These workflows do not silently change account/repository security settings. Che
 - Dependency graph and Dependabot alerts/security updates are enabled. Version-update PRs are configured by `dependabot.yml`; the alert/security-update settings are separate.
 - CodeQL uses **advanced setup** (the committed workflow). Do not run conflicting default and advanced setups. Do not weaken existing repository protections.
 - A main-branch ruleset requires Android Checks, Dependency Review and CodeQL checks once their exact check names have appeared; disallow unreviewed merges as appropriate. Workflows alone cannot enforce required checks.
-- Protect version tags, and optionally require approval of release changes before tagging. Do not allow untrusted contributors to create signing-triggering tags.
+- Protect versioned tags, and optionally require approval of stable release changes before tagging. Allow the `v1` preview workflow's GitHub token to create and move the `v1` tag. Do not allow untrusted contributors to create signing-triggering versioned tags.
 
 The automation does not install a paid external review app or configure Copilot auto-review. Static review comes from CodeQL, Android lint, actionlint, dependency review and regression tests. Maintainer review remains necessary, especially for permissions, signing workflows and native playback.
 

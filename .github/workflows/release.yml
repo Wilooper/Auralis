@@ -1,7 +1,7 @@
 name: Tagged Release
 on:
   push:
-    tags: ['v*']
+    tags: ['v*.*.*']
   workflow_dispatch:
 permissions:
   contents: read

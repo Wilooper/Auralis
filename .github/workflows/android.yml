@@ -54,7 +54,7 @@ jobs:
           path: |
             **/build/reports/
             **/build/test-results/
-      - name: Upload APKs
+      - name: Upload APKs and seek bar extension
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: auralis-debug-apks-${{ github.run_id }}
@@ -63,6 +63,7 @@ jobs:
           path: |
             app/build/outputs/apk/debug/*.apk
             app/build/outputs/apk/debug/SHA256SUMS.txt
+            sdk/examples/seekbar-styles.auralis.json
       - name: Installation notice
         run: |
-          printf '%s\n' '### Test APKs' 'APKs and SHA256SUMS are in the run artifacts. These use a temporary CI debug key, not the private key used for previous phone builds. They may require uninstalling a differently signed test app. Back up app settings first; uninstalling clears app data.' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' '### Test APKs and seek bar styles' 'APKs, SHA256SUMS and the seek bar extension are in the run artifacts. These use a temporary CI debug key, not the private key used for previous phone builds. They may require uninstalling a differently signed test app. Back up app settings first; uninstalling clears app data.' >> "$GITHUB_STEP_SUMMARY"
