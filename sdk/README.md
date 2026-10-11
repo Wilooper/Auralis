@@ -1,4 +1,4 @@
-# Auralis community SDK v1 — Android 0.5.0
+# Auralis community SDK v1 — Android 0.5.1-dev
 
 Auralis loads **data-only extension files**. Community business logic runs on a server behind open HTTPS APIs. The phone renders approved contributions and performs checked operations through its host bridge. No extension has filesystem access, shell access, native code, reflection, dynamic class loading, or an unrestricted JavaScript-to-Android bridge.
 
@@ -51,6 +51,8 @@ SDK v1 does not automatically play the shared queue, synchronize clocks, stream 
 Use **Customize appearance** in the extension manager to edit these tokens directly on the phone, without writing a file. Apply creates a local appearance-only extension that can be disabled or removed like any other skin.
 
 Tokens: `primary`, `background`, `surface`, `text`, `muted` (#RRGGBB); `textScale` (.85–1.3); `rowHeight` (64–112 dp); `cornerRadius` (0–32 dp); `artworkSize` (40–80 dp); `layout` (`standard`, `compact`, `covers`); `font` (`sans`, `serif`, `mono`); `atmosphere` (boolean). Text and surface/background must reach 4.5:1 contrast; muted/primary have lower 3:1 checks. Native accessibility scaling still applies. Last enabled skin with a `skin.apply` grant wins. Disabling it restores the previous skin or built-in theme.
+
+`seekBarStyles` declares one to four native player styles: `classic`, `pill`, `segmented`, `wave`. Import `examples/seekbar-styles.auralis.json`, enable its `skin.apply` grant, then choose a style in the extension manager. The choice is saved on the phone; the first declared style is the default. The visual track changes while the native seek gesture and accessibility semantics remain in place. SDK v1 files made before this token continue to use `classic`.
 
 Skins style native text, surfaces, controls and library row/grid presentation. They cannot inject arbitrary HTML/CSS/Compose code, replace native navigation, remove security prompts, or shrink controls below supported touch sizes. Some artwork/featured decorations retain their built-in palette. This is the safe declarative skin API foundation, not an arbitrary UI runtime.
 

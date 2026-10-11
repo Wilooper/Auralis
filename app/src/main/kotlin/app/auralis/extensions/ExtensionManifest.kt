@@ -61,14 +61,20 @@ data class ExtensionManifest(val id: String, val name: String, val version: Stri
 data class Skin(val primary: String = "#69E0BE", val background: String = "#09090C", val surface: String = "#19191F",
     val text: String = "#F8F6F7", val muted: String = "#ADABB6", val textScale: Float = 1f,
     val rowHeight: Int = 72, val cornerRadius: Int = 18, val artworkSize: Int = 56,
-    val layout: String = "standard", val font: String = "sans", val atmosphere: Boolean = true) {
+    val layout: String = "standard", val font: String = "sans", val atmosphere: Boolean = true,
+    val seekBarStyles: List<String> = listOf("classic"), val seekBarStyle: String = seekBarStyles.first()) {
     companion object {
+        val supportedSeekBarStyles = setOf("classic", "pill", "segmented", "wave")
         fun parse(json: JSONObject): Skin {
-            require(json.keys().asSequence().all { it in setOf("primary", "background", "surface", "text", "muted", "textScale", "rowHeight", "cornerRadius", "artworkSize", "layout", "font", "atmosphere") }) { "Unknown skin token" }
+            require(json.keys().asSequence().all { it in setOf("primary", "background", "surface", "text", "muted", "textScale", "rowHeight", "cornerRadius", "artworkSize", "layout", "font", "atmosphere", "seekBarStyles") }) { "Unknown skin token" }
             fun color(key: String, fallback: String) = json.optString(key, fallback).also { require(it.matches(Regex("#[0-9a-fA-F]{6}"))) { "Invalid $key color" } }
+            val options = json.optJSONArray("seekBarStyles")?.let { array ->
+                (0 until array.length()).map { array.getString(it) }
+            } ?: listOf("classic")
+            require(options.isNotEmpty() && options.size <= 4 && options.distinct() == options && options.all { it in supportedSeekBarStyles }) { "Invalid seek bar styles" }
             val skin = Skin(color("primary", "#69E0BE"), color("background", "#09090C"), color("surface", "#19191F"), color("text", "#F8F6F7"), color("muted", "#ADABB6"),
                 json.optDouble("textScale", 1.0).toFloat(), json.optInt("rowHeight", 72), json.optInt("cornerRadius", 18), json.optInt("artworkSize", 56),
-                json.optString("layout", "standard"), json.optString("font", "sans"), json.optBoolean("atmosphere", true))
+                json.optString("layout", "standard"), json.optString("font", "sans"), json.optBoolean("atmosphere", true), options)
             require(skin.textScale.isFinite() && skin.textScale in .85f..1.3f && skin.rowHeight in 64..112 && skin.cornerRadius in 0..32 && skin.artworkSize in 40..80) { "Skin exceeds accessibility/layout limits" }
             require(skin.layout in setOf("standard", "compact", "covers") && skin.font in setOf("sans", "serif", "mono")) { "Unsupported skin layout or font" }
             fun luminance(c: String): Double {

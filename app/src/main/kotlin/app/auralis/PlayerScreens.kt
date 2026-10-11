@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -28,6 +29,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -105,13 +108,43 @@ private fun PlayerSeekBar(state: PlayerScreenState, model: PlayerViewModel) {
     var scrub by remember(id) { mutableStateOf<Float?>(null) }
     val duration = state.durationMs.coerceAtLeast(1).toFloat()
     val interaction = remember { MutableInteractionSource() }
+    val style = LocalSkin.current.seekBarStyle
     val colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.onSurface, activeTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .85f), inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .18f))
     Slider(value = if (state.durationMs > 0) scrub ?: state.positionMs.toFloat().coerceIn(0f, duration) else 0f, onValueChange = { scrub = it },
         onValueChangeFinished = { scrub?.let { model.seek(it.toLong()) }; scrub = null },
         valueRange = 0f..duration, enabled = state.seekable && state.durationMs > 0,
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp), interactionSource = interaction, colors = colors,
-        thumb = { Box(Modifier.size(10.dp).background(MaterialTheme.colorScheme.onSurface, CircleShape)) },
-        track = { slider -> SliderDefaults.Track(slider, Modifier.height(4.dp), enabled = state.seekable && state.durationMs > 0, colors = colors) })
+        thumb = { Box(Modifier.size(if (style == "classic") 10.dp else 12.dp).background(MaterialTheme.colorScheme.onSurface, CircleShape)) },
+        track = { slider ->
+            if (style == "classic") SliderDefaults.Track(slider, Modifier.height(4.dp), enabled = state.seekable && state.durationMs > 0, colors = colors)
+            else {
+                val active = MaterialTheme.colorScheme.onSurface.copy(alpha = if (state.seekable) .9f else .4f)
+                val inactive = MaterialTheme.colorScheme.onSurface.copy(alpha = .18f)
+                val progress = ((slider.value - slider.valueRange.start) / (slider.valueRange.endInclusive - slider.valueRange.start).coerceAtLeast(1f)).coerceIn(0f, 1f)
+                Canvas(Modifier.fillMaxWidth().height(20.dp)) {
+                    val width = size.width
+                    val center = size.height / 2f
+                    when (style) {
+                        "pill" -> {
+                            val height = 8.dp.toPx()
+                            drawRoundRect(inactive, Offset(0f, center - height / 2), Size(width, height), CornerRadius(height / 2))
+                            if (progress > 0f) drawRoundRect(active, Offset(0f, center - height / 2), Size(width * progress, height), CornerRadius(height / 2))
+                        }
+                        "segmented", "wave" -> {
+                            val count = if (style == "wave") 48 else 28
+                            val gap = 2.dp.toPx()
+                            val barWidth = ((width - (count - 1) * gap) / count).coerceAtLeast(1f)
+                            repeat(count) { index ->
+                                val barHeight = if (style == "wave") (5f + 9f * kotlin.math.abs(kotlin.math.sin(index * 0.65).toFloat())).dp.toPx() else 6.dp.toPx()
+                                val left = index * (barWidth + gap)
+                                drawRoundRect(if ((index + .5f) / count <= progress) active else inactive,
+                                    Offset(left, center - barHeight / 2), Size(barWidth, barHeight), CornerRadius(barWidth / 2))
+                            }
+                        }
+                    }
+                }
+            }
+        })
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(timeLabel(scrub?.toLong() ?: state.positionMs), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .55f))
         Text(if (state.durationMs > 0) "−${timeLabel((state.durationMs - (scrub?.toLong() ?: state.positionMs)).coerceAtLeast(0))}" else "—:—",

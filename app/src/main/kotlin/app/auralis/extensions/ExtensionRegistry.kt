@@ -16,17 +16,17 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class ExtensionRegistry(private val context: Context) {
-    data class Entry(val manifest: ExtensionManifest, val enabled: Boolean, val revision: Long, val grants: Set<String> = emptySet())
+    data class Entry(val manifest: ExtensionManifest, val enabled: Boolean, val revision: Long, val grants: Set<String> = emptySet(), val seekBarStyle: String? = null)
     private val prefs = context.getSharedPreferences("extensions-v1", Context.MODE_PRIVATE)
     private val mutable = MutableStateFlow(load())
     val entries = mutable.asStateFlow()
     var revoke: (String) -> Unit = {}
     private fun load(): List<Entry> = runCatching {
         val rows = JSONArray(prefs.getString("entries", "[]"))
-        (0 until minOf(rows.length(), 24)).map { val r = rows.getJSONObject(it); Entry(ExtensionManifest.parse(r.getString("manifest")), r.optBoolean("enabled"), r.optLong("revision", 1), r.optJSONArray("grants")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet()) }
+        (0 until minOf(rows.length(), 24)).map { val r = rows.getJSONObject(it); Entry(ExtensionManifest.parse(r.getString("manifest")), r.optBoolean("enabled"), r.optLong("revision", 1), r.optJSONArray("grants")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet(), r.optString("seekBarStyle").takeIf(String::isNotEmpty)) }
     }.getOrDefault(emptyList())
     @Synchronized private fun save(rows: List<Entry>) {
-        val encoded = JSONArray().apply { rows.forEach { put(JSONObject().put("manifest", it.manifest.raw).put("enabled", it.enabled).put("revision", it.revision).put("grants", JSONArray(it.grants.toList()))) } }
+        val encoded = JSONArray().apply { rows.forEach { put(JSONObject().put("manifest", it.manifest.raw).put("enabled", it.enabled).put("revision", it.revision).put("grants", JSONArray(it.grants.toList())).put("seekBarStyle", it.seekBarStyle ?: "")) } }
         check(prefs.edit().putString("entries", encoded.toString()).commit()) { "Could not save extension settings" }
         mutable.value = rows
     }
@@ -58,7 +58,14 @@ class ExtensionRegistry(private val context: Context) {
         check(it.enabled && capability in it.grants) { "Extension permission revoked or missing: $capability" }
     } ?: error("Extension is not installed")
     fun valid(id: String, revision: Long) = entries.value.any { it.manifest.id == id && it.enabled && it.revision == revision }
-    val activeSkin: Skin? get() = entries.value.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }?.manifest?.skin
+    @Synchronized fun chooseSeekBarStyle(id: String, style: String) {
+        val entry = requireEnabled(id, "skin.apply")
+        require(style in (entry.manifest.skin?.seekBarStyles ?: emptyList())) { "Style is not offered by this extension" }
+        save(entries.value.map { if (it.manifest.id == id) it.copy(seekBarStyle = style) else it })
+    }
+    val activeSkin: Skin? get() = entries.value.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }?.let {
+        it.manifest.skin!!.let { skin -> skin.copy(seekBarStyle = it.seekBarStyle?.takeIf { selected -> selected in skin.seekBarStyles } ?: skin.seekBarStyles.first()) }
+    }
     @Synchronized fun saveToken(id: String, token: String) {
         require(token.length <= 4096 && token.none { it == '\r' || it == '\n' }) { "Invalid token" }
         enable(id, false) // Changing credentials requires a fresh grant.

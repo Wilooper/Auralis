@@ -16,6 +16,12 @@ class SDKTest(unittest.TestCase):
         with self.assertRaises(ValueError): validate(m)
         m['skin']={'text':'#09090C'}
         with self.assertRaises(ValueError): validate(m)
+    def test_seek_bar_style_options(self):
+        m={'apiVersion':1,'id':'org.test.seek','name':'Seek styles','version':'1.0.0','capabilities':['skin.apply'],'origins':[],'skin':{'seekBarStyles':['classic','pill','segmented','wave']}}
+        validate(m)
+        for styles in [[],['wave','wave'],['unknown'],['classic','pill','segmented','wave','classic']]:
+            m['skin']['seekBarStyles']=styles
+            with self.assertRaises(ValueError): validate(m)
 
 class ServerTest(unittest.TestCase):
     def setUp(self):

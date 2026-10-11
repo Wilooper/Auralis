@@ -38,6 +38,7 @@ class ExtensionViewModel(application: Application) : AndroidViewModel(applicatio
     fun importFile(uri: Uri) = run { val entry = withContext(Dispatchers.IO) { registry.importFile(uri) }; mutable.value = mutable.value.copy(message = "${entry.manifest.name} imported. Review permissions to enable it.") }
     fun toggle(id: String, enabled: Boolean, grants: Set<String>? = null) = run { withContext(Dispatchers.IO) { if(grants == null) registry.enable(id, enabled) else registry.enable(id, enabled, grants) } }
     fun remove(id: String) = run { withContext(Dispatchers.IO) { registry.remove(id) } }
+    fun chooseSeekBarStyle(id: String, style: String) = run { withContext(Dispatchers.IO) { registry.chooseSeekBarStyle(id, style) } }
     fun token(id: String, text: String) = run { withContext(Dispatchers.IO) { registry.saveToken(id,text) }; mutable.value = mutable.value.copy(message = "Token saved. Review permissions to enable the extension.") }
     fun browse(id: String, query: String) {
         mutable.value = ExtensionState(provider = id)

@@ -71,13 +71,15 @@ jobs:
         run: |
           git archive --format=zip --prefix=Auralis/ HEAD -o "dist/Auralis-$RELEASE_TAG-Source.zip"
           git archive --format=zip HEAD sdk -o "dist/Auralis-$RELEASE_TAG-Community-SDK.zip"
+          cp sdk/examples/seekbar-styles.auralis.json "dist/Auralis-$RELEASE_TAG-Seek-Bar-Styles.auralis.json"
           printf '%s\n' "Auralis $RELEASE_TAG" "Source commit: $GITHUB_SHA" > dist/RELEASE-NOTES.md
+          printf '\n%s\n' 'Seek bar styles: install the APK, import the attached .auralis.json file in Settings > Extensions & internet, grant skin.apply, then select Classic, Pill, Segmented or Wave in the extension manager.' >> dist/RELEASE-NOTES.md
           if [[ "$PRERELEASE" == true ]]; then
             printf '\n%s\n' 'Development preview, not a stable release. APKs use a temporary CI debug key and may require uninstalling earlier builds (which clears app settings). Physical-device/security validation remains open. Do not use this key for production.' >> dist/RELEASE-NOTES.md
           else
             printf '\n%s\n' 'APKs are signed with the configured release key. Successful automation does not replace physical-device testing or third-party license review.' >> dist/RELEASE-NOTES.md
           fi
-          (cd dist && sha256sum -- *.apk *.zip RELEASE-NOTES.md > SHA256SUMS.txt)
+          (cd dist && sha256sum -- *.apk *.zip *.auralis.json RELEASE-NOTES.md > SHA256SUMS.txt)
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-assets

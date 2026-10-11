@@ -1,6 +1,7 @@
 package app.auralis.extensions
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,6 +49,15 @@ fun ExtensionScreen(entries: List<ExtensionRegistry.Entry>, state: ExtensionStat
                         Row { Column(Modifier.weight(1f)) { Text(row.manifest.name, style = MaterialTheme.typography.titleMedium); Text("${row.manifest.id} · ${row.manifest.version}", style = MaterialTheme.typography.bodySmall) }
                             Switch(row.enabled, { if(it) { allowed = row.manifest.capabilities; review = row } else model.toggle(row.manifest.id, false) }, enabled = !state.busy) }
                         Text(row.manifest.capabilities.joinToString(" · "), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall)
+                        if (row.enabled && "skin.apply" in row.grants && row.manifest.skin?.seekBarStyles.orEmpty().size > 1) {
+                            Text("Player seek bar", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.labelLarge)
+                            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                row.manifest.skin!!.seekBarStyles.forEach { style ->
+                                    FilterChip((row.seekBarStyle ?: row.manifest.skin.seekBarStyles.first()) == style,
+                                        { model.chooseSeekBarStyle(row.manifest.id, style) }, label = { Text(style.replaceFirstChar(Char::uppercase)) }, enabled = !state.busy)
+                                }
+                            }
+                        }
                         Row {
                             TextButton({ allowed = if(row.enabled) row.grants else row.manifest.capabilities; review = row }) { Text("Access") }
                             if(row.manifest.provider != null || row.manifest.party != null) TextButton({ credentials = row.manifest.id; token = "" }) { Text("Server token") }
@@ -56,7 +66,7 @@ fun ExtensionScreen(entries: List<ExtensionRegistry.Entry>, state: ExtensionStat
                     }
                 }
             }
-            item { Text("Skins control colors, typography, cover size, rows, corners and library layout. The last enabled skin wins; disabling it restores the previous style.", style = MaterialTheme.typography.bodySmall)
+            item { Text("Skins control colors, typography, cover size, rows, corners, library layout and player seek bar styles. The last enabled skin wins; disabling it restores the previous style.", style = MaterialTheme.typography.bodySmall)
                 Text("No background polling, downloaded scripts, APKs, native plugins, or store downloads in SDK v1.", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall) }
         } else {
             val choices = enabled.filter { if(mode == "Party") "party.session" in it.grants && it.manifest.party != null else ("catalog.read" in it.grants && it.manifest.provider != null) || ("web.embed" in it.grants && it.manifest.web != null) }

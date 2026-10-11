@@ -4,6 +4,7 @@ export interface Skin {
   primary?: string; background?: string; surface?: string; text?: string; muted?: string;
   textScale?: number; rowHeight?: number; cornerRadius?: number; artworkSize?: number;
   layout?: 'standard' | 'compact' | 'covers'; font?: 'sans' | 'serif' | 'mono'; atmosphere?: boolean;
+  seekBarStyles?: Array<'classic' | 'pill' | 'segmented' | 'wave'>;
 }
 export interface ExtensionManifest {
   apiVersion: 1; id: string; name: string; version: string; capabilities: Capability[]; origins: string[];

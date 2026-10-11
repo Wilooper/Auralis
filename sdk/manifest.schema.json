@@ -115,6 +115,15 @@
         },
         "atmosphere": {
           "type": "boolean"
+        },
+        "seekBarStyles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["classic", "pill", "segmented", "wave"]
+          }
         }
       }
     },

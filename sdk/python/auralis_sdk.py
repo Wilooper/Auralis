@@ -29,7 +29,9 @@ def validate(m: dict) -> dict:
     if 'stream.play' in caps and 'provider' not in m: raise ValueError('Streaming needs a provider')
     if 'skin' in m:
         s = m['skin']
-        if 'skin.apply' not in caps or set(s) - {'primary','background','surface','text','muted','textScale','rowHeight','cornerRadius','artworkSize','layout','font','atmosphere'}: raise ValueError('Invalid skin contribution')
+        if 'skin.apply' not in caps or set(s) - {'primary','background','surface','text','muted','textScale','rowHeight','cornerRadius','artworkSize','layout','font','atmosphere','seekBarStyles'}: raise ValueError('Invalid skin contribution')
+        styles = s.get('seekBarStyles',['classic'])
+        if not isinstance(styles,list) or not 1 <= len(styles) <= 4 or any(not isinstance(style,str) for style in styles) or len(set(styles)) != len(styles) or not set(styles) <= {'classic','pill','segmented','wave'}: raise ValueError('Invalid seek bar styles')
         colors = {'primary':'#69E0BE','background':'#09090C','surface':'#19191F','text':'#F8F6F7','muted':'#ADABB6'}
         for key,default in colors.copy().items():
             colors[key] = s.get(key,default)

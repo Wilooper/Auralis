@@ -17,7 +17,7 @@ class ExtensionSecurityTest {
     @Test fun publishedSdkExamplesAreAcceptedByAndroid() {
         val root = java.io.File(System.getProperty("auralis.fixtures")).parentFile.resolve("sdk/examples")
         val examples = root.listFiles { file -> file.name.endsWith(".auralis.json") }!!
-        assertEquals(4,examples.size)
+        assertEquals(5,examples.size)
         examples.forEach { ExtensionManifest.parse(it.readText()) }
     }
     @Test fun scriptsAndNativeCodeCannotBeImported() { denied { ExtensionManifest.parse(manifest(",\"script\":\"evil.js\"")) }; denied { ExtensionManifest.parse(manifest().replace("catalog.read", "device.exec")) } }
@@ -29,6 +29,23 @@ class ExtensionSecurityTest {
     @Test fun unknownVersionsAndContributionCapabilitiesAreRejected() { denied { ExtensionManifest.parse(manifest().replace("\"apiVersion\":1", "\"apiVersion\":2")) }; denied { ExtensionManifest.parse(manifest().replace("\"catalog.read\",", "")) } }
     @Test fun parsingBoundsBytesDepthAndTrailingContent() { denied { ExtensionManifest.parse(" ".repeat(65_537)) }; denied { ExtensionManifest.parse("[".repeat(17)+"]".repeat(17)) }; denied { ExtensionManifest.parse(manifest()+" trailing") } }
     @Test fun safeSkinRejectsUnreadableColorsAndExtremeLayout() { denied { Skin.parse(JSONObject().put("textScale",4)) }; denied { Skin.parse(JSONObject().put("background","#FFFFFF")) }; denied { Skin.parse(JSONObject().put("rowHeight",1)) }; assertEquals("compact", Skin.parse(JSONObject().put("layout","compact")).layout) }
+    @Test fun seekBarStyleSelectionIsBoundedAndPersists() {
+        val context = RuntimeEnvironment.getApplication()
+        val styles = org.json.JSONArray(listOf("classic", "pill", "segmented", "wave"))
+        val text = """{"apiVersion":1,"id":"org.test.seek","name":"Seek styles","version":"1.0.0","capabilities":["skin.apply"],"origins":[],"skin":{"seekBarStyles":$styles}}"""
+        val registry = ExtensionRegistry(context)
+        registry.install(text)
+        denied { registry.chooseSeekBarStyle("org.test.seek", "wave") }
+        registry.enable("org.test.seek", true)
+        registry.chooseSeekBarStyle("org.test.seek", "wave")
+        assertEquals("wave", registry.activeSkin?.seekBarStyle)
+        assertEquals("wave", ExtensionRegistry(context).activeSkin?.seekBarStyle)
+        denied { registry.chooseSeekBarStyle("org.test.seek", "unknown") }
+        registry.enable("org.test.seek", false)
+        assertNull(registry.activeSkin)
+        denied { Skin.parse(JSONObject().put("seekBarStyles", org.json.JSONArray(listOf("wave", "wave")))) }
+        denied { Skin.parse(JSONObject().put("seekBarStyles", org.json.JSONArray(listOf("untrusted")))) }
+    }
     @Test fun installsDisabledAndPartialGrantsAreEnforced() {
         val registry = ExtensionRegistry(RuntimeEnvironment.getApplication()); registry.install(manifest())
         denied { registry.requireEnabled("org.test.player","catalog.read") }
