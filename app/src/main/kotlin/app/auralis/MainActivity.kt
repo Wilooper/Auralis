@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
             val extensions: ExtensionViewModel = viewModel()
             val entries by extensions.entries.collectAsStateWithLifecycle()
             val skin = entries.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }?.manifest?.skin
-            AuralisTheme(state.accent, skin) { AuralisScreen(state, model) }
+            ReVaTheme(state.accent, skin) { ReVaScreen(state, model) }
         }
     }
 }
@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @UnstableApi
 @Composable
-private fun AuralisScreen(state: PlayerScreenState, model: PlayerViewModel) {
+private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
     val context = LocalContext.current
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var settings by rememberSaveable { mutableStateOf(false) }
@@ -116,7 +116,7 @@ private fun AuralisScreen(state: PlayerScreenState, model: PlayerViewModel) {
                 else TopAppBar(title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.GraphicEq, null, Modifier.size(26.dp), tint = MaterialTheme.colorScheme.primary)
-                        Text("Auralis", Modifier.padding(start = 9.dp), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("ReVa", Modifier.padding(start = 9.dp), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
                 }, actions = {
                     IconButton(onClick = { flow.reload(); flowDialog = true }) { Icon(Icons.Rounded.AutoAwesome, "Create a gradual playlist") }

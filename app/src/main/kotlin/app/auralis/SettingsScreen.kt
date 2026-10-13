@@ -82,10 +82,10 @@ internal fun SettingsScreen(state: PlayerScreenState, model: PlayerViewModel, ho
         item { HorizontalDivider(); Text("Listening history", Modifier.padding(top = 20.dp), style = MaterialTheme.typography.titleLarge)
             Text("History records songs when playback starts. Favorites stay saved until you remove them.", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             TextButton(onClick = { clear = true }) { Text("Clear listening history") }
-            Text("Auralis · v5 SDK foundation / 0.5.0", Modifier.padding(top = 18.dp, bottom = 24.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("ReVa · Extension SDK v1", Modifier.padding(top = 18.dp, bottom = 24.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
-    remove?.let { source -> AlertDialog(onDismissRequest = { remove = null }, title = { Text("Remove ${source.label}?") }, text = { Text("Remove this source from Auralis. Audio files stay on your device; songs covered by another saved folder stay in the library.") },
+    remove?.let { source -> AlertDialog(onDismissRequest = { remove = null }, title = { Text("Remove ${source.label}?") }, text = { Text("Remove this source from ReVa. Audio files stay on your device; songs covered by another saved folder stay in the library.") },
         confirmButton = { TextButton(onClick = { library.remove(source); remove = null }) { Text("Remove") } }, dismissButton = { TextButton(onClick = { remove = null }) { Text("Cancel") } }) }
     if(clear) AlertDialog(onDismissRequest = { clear = false }, title = { Text("Clear listening history?") }, text = { Text("This clears the History tab. Your music and favorites stay saved.") }, confirmButton = { TextButton(onClick = { library.clearHistory(); clear = false }) { Text("Clear") } }, dismissButton = { TextButton(onClick = { clear = false }) { Text("Cancel") } })
 }

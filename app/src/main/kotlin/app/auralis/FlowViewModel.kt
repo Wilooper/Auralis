@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.*
 data class FlowState(val goal: FlowGoal = FlowGoal.STEADY, val busy: Boolean = false, val analyzed: Int = 0, val total: Int = 0, val done: Int = 0,
     val skipped: Int = 0, val message: String? = null, val preview: List<LibraryTrack> = emptyList())
 class FlowViewModel(app: Application) : AndroidViewModel(app) {
-    private val db = (app as AuralisApplication).library.database
+    private val db = (app as ReVaApplication).library.database
     private val mutable = MutableStateFlow(FlowState())
     val state = mutable.asStateFlow()
     private var job: Job? = null

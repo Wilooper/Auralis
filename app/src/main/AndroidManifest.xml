@@ -6,9 +6,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <application android:name=".AuralisApplication" android:allowBackup="false" android:usesCleartextTraffic="false" android:fullBackupContent="false"
-        android:dataExtractionRules="@xml/data_extraction_rules" android:label="Auralis"
-        android:icon="@drawable/ic_auralis" android:theme="@style/Theme.Auralis"
+    <application android:name=".ReVaApplication" android:allowBackup="false" android:usesCleartextTraffic="false" android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules" android:label="ReVa"
+        android:icon="@drawable/ic_auralis" android:theme="@style/Theme.ReVa"
         android:supportsRtl="true">
         <provider android:name=".library.ArtworkProvider" android:authorities="${applicationId}.artwork"
             android:exported="false" android:grantUriPermissions="true" />

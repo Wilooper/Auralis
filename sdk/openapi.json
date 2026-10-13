@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Auralis community provider and party API",
+    "title": "ReVa community provider and party API",
     "version": "1.0.0",
     "description": "Implement on your own HTTPS server. The Android host bridge is not an externally exposed HTTP API."
   },

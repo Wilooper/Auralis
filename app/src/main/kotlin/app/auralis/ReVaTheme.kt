@@ -28,7 +28,7 @@ internal val accents = listOf(Color(0xFF69E0BE), Color(0xFFFF929D), Color(0xFF8F
 internal val LocalSkin = staticCompositionLocalOf { Skin() }
 
 @Composable
-internal fun AuralisTheme(accent: Int, customSkin: Skin? = null, content: @Composable () -> Unit) {
+internal fun ReVaTheme(accent: Int, customSkin: Skin? = null, content: @Composable () -> Unit) {
     val skin = customSkin ?: Skin()
     fun color(value: String) = Color(android.graphics.Color.parseColor(value))
     val primary = customSkin?.let { color(it.primary) } ?: accents[accent.coerceIn(accents.indices)]

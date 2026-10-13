@@ -1,6 +1,6 @@
-# Contributing to Auralis
+# Contributing to ReVa
 
-Auralis is an Android-first Kotlin/Compose music player using LibVLC. Extension files are declarative JSON; community business logic runs on servers behind the documented HTTPS API.
+ReVa is an Android-first Kotlin/Compose music player using LibVLC. Extension files are declarative JSON; community business logic runs on servers behind the documented HTTPS API.
 
 ## Build and check
 

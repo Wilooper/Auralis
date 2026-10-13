@@ -38,7 +38,11 @@ data class ExtensionManifest(val id: String, val name: String, val version: Stri
             provider?.let { require(it.keys().asSequence().all { key -> key in setOf("catalogUrl") }); allowed(it.getString("catalogUrl"), origins) }
             require("stream.play" !in caps || provider != null) { "Streaming needs a provider" }
             val web = section("web", "web.embed")
-            web?.let { require(it.keys().asSequence().all { key -> key == "url" }); allowed(it.getString("url"), origins) }
+            web?.let {
+                require(it.keys().asSequence().all { key -> key in setOf("url", "role") })
+                require(it.optString("role", "player") in setOf("player", "dashboard")) { "Web role must be player or dashboard" }
+                allowed(it.getString("url"), origins)
+            }
             val party = section("party", "party.session")
             party?.let { require(it.keys().asSequence().all { key -> key == "url" }); allowed(it.getString("url"), origins) }
             val skin = section("skin", "skin.apply")?.let(Skin::parse)
@@ -62,11 +66,12 @@ data class Skin(val primary: String = "#69E0BE", val background: String = "#0909
     val text: String = "#F8F6F7", val muted: String = "#ADABB6", val textScale: Float = 1f,
     val rowHeight: Int = 72, val cornerRadius: Int = 18, val artworkSize: Int = 56,
     val layout: String = "standard", val font: String = "sans", val atmosphere: Boolean = true,
-    val seekBarStyles: List<String> = listOf("classic"), val seekBarStyle: String = seekBarStyles.first()) {
+    val seekBarStyles: List<String> = listOf("classic"), val seekBarStyle: String = seekBarStyles.first(),
+    val artworkStyle: String = "image", val coverMotion: String = "none") {
     companion object {
         val supportedSeekBarStyles = setOf("classic", "pill", "segmented", "wave")
         fun parse(json: JSONObject): Skin {
-            require(json.keys().asSequence().all { it in setOf("primary", "background", "surface", "text", "muted", "textScale", "rowHeight", "cornerRadius", "artworkSize", "layout", "font", "atmosphere", "seekBarStyles") }) { "Unknown skin token" }
+            require(json.keys().asSequence().all { it in setOf("primary", "background", "surface", "text", "muted", "textScale", "rowHeight", "cornerRadius", "artworkSize", "layout", "font", "atmosphere", "seekBarStyles", "artworkStyle", "coverMotion") }) { "Unknown skin token" }
             fun color(key: String, fallback: String) = json.optString(key, fallback).also { require(it.matches(Regex("#[0-9a-fA-F]{6}"))) { "Invalid $key color" } }
             val options = json.optJSONArray("seekBarStyles")?.let { array ->
                 (0 until array.length()).map { array.getString(it) }
@@ -74,9 +79,11 @@ data class Skin(val primary: String = "#69E0BE", val background: String = "#0909
             require(options.isNotEmpty() && options.size <= 4 && options.distinct() == options && options.all { it in supportedSeekBarStyles }) { "Invalid seek bar styles" }
             val skin = Skin(color("primary", "#69E0BE"), color("background", "#09090C"), color("surface", "#19191F"), color("text", "#F8F6F7"), color("muted", "#ADABB6"),
                 json.optDouble("textScale", 1.0).toFloat(), json.optInt("rowHeight", 72), json.optInt("cornerRadius", 18), json.optInt("artworkSize", 56),
-                json.optString("layout", "standard"), json.optString("font", "sans"), json.optBoolean("atmosphere", true), options)
+                json.optString("layout", "standard"), json.optString("font", "sans"), json.optBoolean("atmosphere", true), options,
+                artworkStyle = json.optString("artworkStyle", "image"), coverMotion = json.optString("coverMotion", "none"))
             require(skin.textScale.isFinite() && skin.textScale in .85f..1.3f && skin.rowHeight in 64..112 && skin.cornerRadius in 0..32 && skin.artworkSize in 40..80) { "Skin exceeds accessibility/layout limits" }
             require(skin.layout in setOf("standard", "compact", "covers") && skin.font in setOf("sans", "serif", "mono")) { "Unsupported skin layout or font" }
+            require(skin.artworkStyle in setOf("image", "ascii", "monochrome", "duotone") && skin.coverMotion in setOf("none", "pulse", "turntable")) { "Unsupported artwork treatment or animation" }
             fun luminance(c: String): Double {
                 val n = c.drop(1).toInt(16)
                 fun channel(v: Int): Double { val x = v / 255.0; return if (x <= .04045) x / 12.92 else Math.pow((x + .055) / 1.055, 2.4) }

@@ -140,7 +140,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     fun playRemote(extension: String, tracks: List<app.auralis.extensions.ExtensionBridge.RemoteTrack>, selected: String, enqueue: Boolean = false) {
         val player = controller ?: return
         try {
-            val bridge = (getApplication<Application>() as AuralisApplication).extensionBridge
+            val bridge = (getApplication<Application>() as ReVaApplication).extensionBridge
             val items = tracks.take(100).map { track ->
                 MediaItem.Builder().setMediaId("remote:$extension:${track.id}").setUri(bridge.mediaUri(extension, track.streamUrl, track.format))
                     .setMediaMetadata(MediaMetadata.Builder().setTitle(track.title).setArtist(track.artist).setAlbumTitle("Internet · $extension").build()).build()

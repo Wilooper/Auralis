@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://auralis.example/schemas/extension-v1",
-  "title": "Auralis SDK v1 manifest",
+  "$id": "https://reva.example/schemas/extension-v1",
+  "title": "ReVa SDK v1 manifest",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -124,6 +124,12 @@
           "items": {
             "enum": ["classic", "pill", "segmented", "wave"]
           }
+        },
+        "artworkStyle": {
+          "enum": ["image", "ascii", "monochrome", "duotone"]
+        },
+        "coverMotion": {
+          "enum": ["none", "pulse", "turntable"]
         }
       }
     },
@@ -169,6 +175,9 @@
           "format": "uri",
           "maxLength": 2048,
           "pattern": "^https://"
+        },
+        "role": {
+          "enum": ["player", "dashboard"]
         }
       }
     }

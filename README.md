@@ -1,6 +1,6 @@
-# Auralis — 0.5.0-dev
+# ReVa — 0.5.1-dev
 
-File-based extensions now contribute HTTPS music providers, server-hosted party queues, isolated iframe players and declarative UI skins through granular capability grants. Open Settings → Extensions & internet to import/review/toggle extensions or customize appearance. Community code executes on servers, never as phone plugins.
+ReVa keeps the existing local music player and adds a reviewed extension foundation: HTTPS music providers, server-hosted party queues, sandboxed web players and developer dashboards, and declarative UI skins with ASCII/monochrome/duotone artwork and low-cost cover animation presets. Open Settings → Extensions & internet to import/review/toggle extensions or customize appearance. Extensions are data-only; approved server requests and sandboxed web views are permission-gated. No native extension code runs on the phone.
 
 See [SDK guide](sdk/README.md), [REST OpenAPI](sdk/openapi.json), [manifest schema](sdk/manifest.schema.json), [host bridge schema](sdk/host-bridge.schema.json), and [v5 notes](V5-SDK.md).
 
@@ -62,7 +62,7 @@ New downloads in a saved on-device folder appear after Android indexes them and 
 
 Read [LYRICS-SUPPORT.md](LYRICS-SUPPORT.md) for supported embedded tags, limits and test scope. Lyrics synchronization requires timestamps already present in the file; this version does not generate timing from plain text.
 
-Read [UI-DESIGN.md](UI-DESIGN.md) for the default design, rendering approach and device review checklist. The listening screens draw inspiration from Apple Music; discovery combines ideas from Spotify, YouTube Music and Tidal with original Auralis layouts.
+Read [UI-DESIGN.md](UI-DESIGN.md) for the default design, rendering approach and device review checklist. The listening screens draw inspiration from Apple Music; discovery combines ideas from Spotify, YouTube Music and Tidal with original ReVa layouts.
 
 ## Modules
 
@@ -86,12 +86,12 @@ Editing Kotlin source and installing/testing APKs on your phone is practical. Th
 
 ## License
 
-Original Auralis source uses Apache-2.0 as an initial open-source default. LibVLC and other dependencies retain their own licenses. Read [THIRD-PARTY.md](THIRD-PARTY.md). Native distribution compliance, package-name ownership and name/trademark clearance remain public-release gates.
+Original ReVa source uses Apache-2.0 as an initial open-source default. LibVLC and other dependencies retain their own licenses. Read [THIRD-PARTY.md](THIRD-PARTY.md). Native distribution compliance, package-name ownership and name/trademark clearance remain public-release gates.
 
 ## Community development
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) for builds, tests and extension contributions. See [SECURITY.md](SECURITY.md) for the bridge boundary and reporting guidance. The [planning pack](docs/planning/README.md) records the original design and backlog; [V5-SDK.md](V5-SDK.md) and the implemented SDK contracts describe the current behavior.
 
-CI runs Android tests, lint, SDK/reference-server tests, workflow checks and signature-verified debug APK builds. CodeQL and dependency review provide automated security checks; Dependabot proposes updates. Issue/PR triage and a main-branch CI-failure reporter support maintainers. Version tags trigger tested APK/source/SDK releases. See [GitHub automation and signing setup](docs/GITHUB-AUTOMATION.md).
+One GitHub Actions workflow runs Android tests and lint, builds signature-verified APKs, and publishes APK assets for version tags. See [GitHub automation and signing setup](docs/GITHUB-AUTOMATION.md).
 
 CI APKs use an ephemeral development certificate and cannot update differently signed phone builds. Production releases require the private signing secrets described in the automation guide; keys never belong in this repository.

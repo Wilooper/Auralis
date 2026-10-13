@@ -1,14 +1,16 @@
-/** Manifest helpers run on the developer's computer or server, never inside Auralis. */
+/** Manifest helpers run on the developer's computer or server, never inside ReVa. */
 export type Capability = 'catalog.read' | 'stream.play' | 'web.embed' | 'skin.apply' | 'party.session';
 export interface Skin {
   primary?: string; background?: string; surface?: string; text?: string; muted?: string;
   textScale?: number; rowHeight?: number; cornerRadius?: number; artworkSize?: number;
   layout?: 'standard' | 'compact' | 'covers'; font?: 'sans' | 'serif' | 'mono'; atmosphere?: boolean;
   seekBarStyles?: Array<'classic' | 'pill' | 'segmented' | 'wave'>;
+  artworkStyle?: 'image' | 'ascii' | 'monochrome' | 'duotone';
+  coverMotion?: 'none' | 'pulse' | 'turntable';
 }
 export interface ExtensionManifest {
   apiVersion: 1; id: string; name: string; version: string; capabilities: Capability[]; origins: string[];
-  provider?: { catalogUrl: string }; web?: { url: string }; skin?: Skin; party?: { url: string };
+  provider?: { catalogUrl: string }; web?: { url: string; role?: 'player' | 'dashboard' }; skin?: Skin; party?: { url: string };
 }
 export interface Track { id: string; title: string; artist?: string; streamUrl: string; format?: 'mp3' | 'flac' | 'wav' | 'ogg' }
 export interface CatalogResponse { tracks: Track[] }

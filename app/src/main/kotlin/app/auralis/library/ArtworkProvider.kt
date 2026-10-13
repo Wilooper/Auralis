@@ -8,7 +8,7 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.ParcelFileDescriptor
-import app.auralis.AuralisApplication
+import app.auralis.ReVaApplication
 import app.auralis.model.LibraryText
 import app.auralis.model.LibraryTrack
 import java.io.File
@@ -29,7 +29,7 @@ class ArtworkProvider : ContentProvider() {
         if (mode != "r") throw FileNotFoundException("Read only artwork")
         val context = requireNotNull(context)
         val id = uri.lastPathSegment?.takeIf { Regex("[a-f0-9]{64}").matches(it) } ?: throw FileNotFoundException()
-        val track = (context.applicationContext as AuralisApplication).library.database.track(id) ?: throw FileNotFoundException()
+        val track = (context.applicationContext as ReVaApplication).library.database.track(id) ?: throw FileNotFoundException()
         val directory = File(context.cacheDir, "covers-v3").apply { mkdirs() }
         val key = LibraryText.id("${track.id}:${track.fingerprint}")
         val output = File(directory, "$key.jpg")

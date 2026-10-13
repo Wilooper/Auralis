@@ -81,7 +81,7 @@ internal fun NowPlaying(state: PlayerScreenState, model: PlayerViewModel, loved:
             Text(metadata.albumTitle?.toString()?.takeUnless { it == "Unknown album" } ?: "Your collection",
                 style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(12.dp))
-            TrackCover(metadata.artworkUri, metadata.title?.toString().orEmpty(), Modifier.size(cover).shadow(28.dp, RoundedCornerShape(16.dp)), RoundedCornerShape(16.dp))
+            TrackCover(metadata.artworkUri, metadata.title?.toString().orEmpty(), Modifier.size(cover).shadow(28.dp, RoundedCornerShape(16.dp)), RoundedCornerShape(16.dp), animate = state.playing)
             Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(top = 20.dp)) {
                 Text(metadata.title?.toString() ?: "Untitled audio", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold,
                     maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)

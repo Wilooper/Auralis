@@ -1,5 +1,5 @@
 """Small HTTPS catalog/stream/party adapter. Extensions execute on your server, never the phone.
-Set AURALIS_SERVER_TOKEN, supply a trusted TLS cert/key, and a folder of audio files.
+Set REVA_SERVER_TOKEN, supply a trusted TLS cert/key, and a folder of audio files.
 For YouTube Music, implement the same endpoints around your own authorized server API.
 """
 from __future__ import annotations
@@ -111,9 +111,9 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--music',required=True); p.add_argument('--base-url',required=True); p.add_argument('--cert',required=True); p.add_argument('--key',required=True); p.add_argument('--bind',default='127.0.0.1'); p.add_argument('--port',type=int,default=8443); a=p.parse_args()
-    server=Server((a.bind,a.port),a.music,a.base_url,os.environ.get('AURALIS_SERVER_TOKEN',''))
+    server=Server((a.bind,a.port),a.music,a.base_url,os.environ.get('REVA_SERVER_TOKEN',os.environ.get('AURALIS_SERVER_TOKEN','')))
     tls=ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER); tls.minimum_version=ssl.TLSVersion.TLSv1_2; tls.load_cert_chain(a.cert,a.key); server.socket=tls.wrap_socket(server.socket,server_side=True)
-    print(f'Auralis adapter ready: {len(server.tracks)} songs. Shared queues only; no synchronized audio.')
+    print(f'ReVa adapter ready: {len(server.tracks)} songs. Shared queues only; no synchronized audio.')
     try: server.serve_forever()
     finally: server.server_close()
 if __name__=='__main__': main()

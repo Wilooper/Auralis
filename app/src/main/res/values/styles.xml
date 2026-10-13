@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.Auralis" parent="android:style/Theme.Material.NoActionBar">
+    <style name="Theme.ReVa" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:colorAccent">#69E0BE</item>
