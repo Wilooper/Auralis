@@ -38,7 +38,7 @@ class PlaybackService : MediaSessionService() {
             if (!restoring) checkpoint()
             val id = player.currentMediaItem?.mediaId
             if (player.isPlaying && id != null && id != lastHistoryId) {
-                lastHistoryId = id; (application as AuralisApplication).library.markPlayed(id)
+                lastHistoryId = id; (application as ReVaApplication).library.markPlayed(id)
             }
             if (events.contains(Player.EVENT_REPEAT_MODE_CHANGED) || events.contains(Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED))
                 getSharedPreferences("playback", MODE_PRIVATE).edit { putInt("repeat", player.repeatMode); putBoolean("shuffle", player.shuffleModeEnabled) }
@@ -55,9 +55,9 @@ class PlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
-        player = VlcSessionPlayer(this, (application as AuralisApplication).extensionBridge::resolve)
+        player = VlcSessionPlayer(this, (application as ReVaApplication).extensionBridge::resolve)
         player.addListener(checkpointListener)
-        val extensionRegistry = (application as AuralisApplication).extensions
+        val extensionRegistry = (application as ReVaApplication).extensions
         var revisions = extensionRegistry.entries.value.associate { it.manifest.id to it.revision }
         serviceScope.launch {
             extensionRegistry.entries.collect { entries ->

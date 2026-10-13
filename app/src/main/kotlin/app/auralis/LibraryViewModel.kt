@@ -30,7 +30,7 @@ data class HomeState(
 )
 
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = (application as AuralisApplication).library
+    private val repository = (application as ReVaApplication).library
     private val controls = MutableStateFlow(HomeState())
     private val mutableHome = MutableStateFlow(HomeState())
     val home = mutableHome.asStateFlow()

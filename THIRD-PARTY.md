@@ -18,7 +18,7 @@ Dependency versions are reproducibly specified, not automatically the newest rel
 | Android Gradle Plugin | `8.10.1` | Apache-2.0 Android build tools |
 | Gradle | `8.11.1` | Apache-2.0; https://gradle.org/ |
 
-LibVLC 3.7.7's AAR requires compile SDK 36. Its published dependencies include Kotlin standard library 2.2.10; the source/compiler pins match that requirement. Original Auralis code is Apache-2.0, not a fork of a GPL player.
+LibVLC 3.7.7's AAR requires compile SDK 36. Its published dependencies include Kotlin standard library 2.2.10; the source/compiler pins match that requirement. Original ReVa code is Apache-2.0, not a fork of a GPL player. The legacy `app.auralis` package and extension file suffix remain stable for upgrades and existing manifests; they are compatibility IDs, not the product name. The `app.auralis` application ID remains provisional and has not been checked for ownership or store conflicts. ReVa's name has not undergone trademark clearance.
 
 Inspected LibVLC AAR SHA-256: `b48dab96e0e90e34cce3861963500c144a5aadb1b249d501d6a4b104d849e61b`.
 
@@ -37,4 +37,4 @@ The source pack includes the original application source and license texts, not 
 
 Create a complete SBOM/license inventory for resolved transitive dependencies. Add accessible in-app notices and source information. Preserve upstream copyrights. Review obligations for each platform and distribution channel. These tasks are unfinished; this is a development prototype, not a compliance-approved public release.
 
-No music, third-party brand artwork, proprietary UI assets, online extractor implementation or ML weights are bundled. The `app.auralis` application ID is provisional and has not been checked for ownership or store conflicts. Auralis's name has not undergone trademark clearance.
+No music, third-party brand artwork, proprietary UI assets, online extractor implementation or ML weights are bundled.

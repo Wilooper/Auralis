@@ -17,9 +17,11 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.animation.core.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -31,14 +33,31 @@ import androidx.compose.ui.unit.dp
 import app.auralis.library.artworkUri
 import app.auralis.model.*
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @Composable
-internal fun TrackCover(uri: Uri?, title: String, modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(12.dp)) {
+internal fun TrackCover(uri: Uri?, title: String, modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(12.dp), animate: Boolean = false) {
+    val context = LocalContext.current
+    val skin = LocalSkin.current
     val primary = MaterialTheme.colorScheme.primary
     val colors = remember(title, primary) { listOf(primary.copy(alpha = .38f), Color(0xFF282332), Color(0xFF131219)) }
-    Box(modifier.clip(shape).background(Brush.linearGradient(colors)), contentAlignment = Alignment.Center) {
+    val motionAllowed = animate && skin.coverMotion != "none" && android.animation.ValueAnimator.areAnimatorsEnabled()
+    val scale = if(motionAllowed && skin.coverMotion == "pulse") {
+        rememberInfiniteTransition(label = "cover-pulse").animateFloat(1f, 1.035f,
+            infiniteRepeatable(tween(2400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "cover-scale").value
+    } else 1f
+    val rotation = if(motionAllowed && skin.coverMotion == "turntable") {
+        rememberInfiniteTransition(label = "cover-turntable").animateFloat(0f, 360f,
+            infiniteRepeatable(tween(24_000, easing = LinearEasing)), label = "cover-rotation").value
+    } else 0f
+    val request = remember(uri, skin.artworkStyle, skin.primary, skin.background) {
+        ImageRequest.Builder(context).data(uri).size(128).allowHardware(false)
+            .transformations(ArtworkTreatment(skin.artworkStyle, android.graphics.Color.parseColor(skin.primary), android.graphics.Color.parseColor(skin.background)))
+            .build()
+    }
+    Box(modifier.graphicsLayer { scaleX = scale; scaleY = scale; rotationZ = rotation }.clip(shape).background(Brush.linearGradient(colors)), contentAlignment = Alignment.Center) {
         Icon(Icons.Rounded.Album, null, Modifier.size(32.dp), tint = Color.White.copy(alpha = .45f))
-        if (uri != null) AsyncImage(uri, "Artwork for $title", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        if (uri != null) AsyncImage(request, "Artwork for $title", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
     }
 }
 

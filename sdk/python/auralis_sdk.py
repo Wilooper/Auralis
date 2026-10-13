@@ -1,4 +1,4 @@
-"""Auralis SDK v1: build file-based, data-only extensions. Python 3.10+, no dependencies."""
+"""ReVa SDK v1: build file-based, data-only extensions. Python 3.10+, no dependencies."""
 from __future__ import annotations
 import json, re, argparse
 from pathlib import Path
@@ -23,13 +23,15 @@ def validate(m: dict) -> dict:
     if len(origins) > 12 or any(origin(x) != x or urlsplit(x).path or urlsplit(x).query or urlsplit(x).fragment for x in origins): raise ValueError('Origins must be exact HTTPS origins')
     for section,cap,key in [('provider','catalog.read','catalogUrl'),('web','web.embed','url'),('party','party.session','url')]:
         if section in m:
-            if cap not in caps or set(m[section]) != {key}: raise ValueError(f'Invalid {section} contribution')
+            allowed_keys = {key, 'role'} if section == 'web' else {key}
+            if cap not in caps or set(m[section]) - allowed_keys or key not in m[section]: raise ValueError(f'Invalid {section} contribution')
+            if section == 'web' and m[section].get('role', 'player') not in {'player', 'dashboard'}: raise ValueError('Invalid web role')
             value = m[section][key]
             if len(value) > 2048 or origin(value) not in origins or urlsplit(value).fragment: raise ValueError('Contribution outside declared origins')
     if 'stream.play' in caps and 'provider' not in m: raise ValueError('Streaming needs a provider')
     if 'skin' in m:
         s = m['skin']
-        if 'skin.apply' not in caps or set(s) - {'primary','background','surface','text','muted','textScale','rowHeight','cornerRadius','artworkSize','layout','font','atmosphere','seekBarStyles'}: raise ValueError('Invalid skin contribution')
+        if 'skin.apply' not in caps or set(s) - {'primary','background','surface','text','muted','textScale','rowHeight','cornerRadius','artworkSize','layout','font','atmosphere','seekBarStyles','artworkStyle','coverMotion'}: raise ValueError('Invalid skin contribution')
         styles = s.get('seekBarStyles',['classic'])
         if not isinstance(styles,list) or not 1 <= len(styles) <= 4 or any(not isinstance(style,str) for style in styles) or len(set(styles)) != len(styles) or not set(styles) <= {'classic','pill','segmented','wave'}: raise ValueError('Invalid seek bar styles')
         colors = {'primary':'#69E0BE','background':'#09090C','surface':'#19191F','text':'#F8F6F7','muted':'#ADABB6'}
@@ -39,6 +41,7 @@ def validate(m: dict) -> dict:
         for key,lo,hi,default in [('textScale',.85,1.3,1),('rowHeight',64,112,72),('cornerRadius',0,32,18),('artworkSize',40,80,56)]:
             if not lo <= s.get(key,default) <= hi: raise ValueError(f'{key} outside supported bounds')
         if s.get('layout','standard') not in {'standard','compact','covers'} or s.get('font','sans') not in {'sans','serif','mono'}: raise ValueError('Unsupported layout/font')
+        if s.get('artworkStyle','image') not in {'image','ascii','monochrome','duotone'} or s.get('coverMotion','none') not in {'none','pulse','turntable'}: raise ValueError('Unsupported artwork style/animation')
         def lum(c):
             rgb = [int(c[i:i+2],16)/255 for i in (1,3,5)]
             return sum(w*(x/12.92 if x<=.04045 else ((x+.055)/1.055)**2.4) for w,x in zip((.2126,.7152,.0722),rgb))

@@ -1,0 +1,131 @@
+name: ReVa APK build and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reva-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: Test and build APKs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/android-setup
+      - name: Validate release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        id: version
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          python3 scripts/ci/release_metadata.py
+      - name: Test extension SDK and release tooling
+        run: |
+          python3 -m unittest discover -s sdk/python -p 'test_*.py'
+          python3 -m unittest discover -s scripts/ci -p 'test_*.py'
+          python3 scripts/ci/check_json.py
+      - name: Android tests and lint
+        run: ./gradlew :core-model:test :app:testDebugUnitTest :core-playback:lintDebug :app:lintDebug --no-daemon --stacktrace
+      - name: Build development APKs
+        if: ${{ !startsWith(github.ref, 'refs/tags/') || steps.version.outputs.prerelease == 'true' }}
+        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+      - name: Build signed stable APKs
+        if: startsWith(github.ref, 'refs/tags/') && steps.version.outputs.prerelease == 'false'
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.AURALIS_RELEASE_KEYSTORE_BASE64 }}
+          AURALIS_STORE_PASSWORD: ${{ secrets.AURALIS_RELEASE_STORE_PASSWORD }}
+          AURALIS_KEY_ALIAS: ${{ secrets.AURALIS_RELEASE_KEY_ALIAS }}
+          AURALIS_KEY_PASSWORD: ${{ secrets.AURALIS_RELEASE_KEY_PASSWORD }}
+        run: |
+          : "${RELEASE_KEYSTORE_BASE64:?Configure the release keystore secret}"
+          : "${AURALIS_STORE_PASSWORD:?Configure the release store password secret}"
+          : "${AURALIS_KEY_ALIAS:?Configure the release key alias secret}"
+          : "${AURALIS_KEY_PASSWORD:?Configure the release key password secret}"
+          umask 077
+          export AURALIS_KEYSTORE_PATH="$RUNNER_TEMP/reva-release.keystore"
+          trap 'rm -f -- "$AURALIS_KEYSTORE_PATH"' EXIT
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$AURALIS_KEYSTORE_PATH"
+          unset RELEASE_KEYSTORE_BASE64
+          ./gradlew :app:assembleRelease --no-daemon --no-build-cache --no-configuration-cache --stacktrace
+      - name: Verify APKs and prepare release files
+        run: |
+          if [[ "${{ steps.version.outputs.prerelease }}" == "false" ]]; then
+            bash scripts/ci/verify-apks.sh app/build/outputs/apk/release
+            apk_dir=app/build/outputs/apk/release
+          else
+            bash scripts/ci/verify-apks.sh app/build/outputs/apk/debug
+            apk_dir=app/build/outputs/apk/debug
+          fi
+          mkdir -p dist
+          cp "$apk_dir"/*.apk dist/
+          printf '%s\n' "ReVa $GITHUB_REF_NAME" "Source commit: $GITHUB_SHA" > dist/RELEASE-NOTES.md
+          if [[ "${{ steps.version.outputs.prerelease }}" == "true" ]]; then
+            printf '\n%s\n' 'Development build, signed with the temporary Android debug key. It cannot update builds signed with a different key.' >> dist/RELEASE-NOTES.md
+          else
+            printf '\n%s\n' 'Stable APKs signed with the configured ReVa release key.' >> dist/RELEASE-NOTES.md
+          fi
+          (cd dist && sha256sum -- *.apk RELEASE-NOTES.md > SHA256SUMS.txt)
+      - name: Upload APKs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: reva-apks-${{ github.run_id }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Build summary
+        run: |
+          printf '%s\n' '### ReVa APKs' 'Verified APKs and SHA256SUMS are attached as workflow artifacts.' >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ steps.version.outputs.prerelease }}" == "true" ]]; then
+            printf '%s\n' 'This is a development APK signed with the temporary Android debug key.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  publish:
+    name: Publish APK release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: reva-apks-${{ github.run_id }}
+          path: dist
+      - name: Verify and publish the tagged release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          cd dist
+          sha256sum --check --strict SHA256SUMS.txt
+          cd ..
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo 'A release already exists for this tag; refusing to overwrite its APKs.' >&2
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS.txt dist/RELEASE-NOTES.md \
+            --verify-tag --title "ReVa $RELEASE_TAG" --notes-file dist/RELEASE-NOTES.md --draft --prerelease="$PRERELEASE"
+          if [[ "$PRERELEASE" == "true" ]]; then
+            gh release edit "$RELEASE_TAG" --draft=false --latest=false
+          else
+            gh release edit "$RELEASE_TAG" --draft=false --latest
+          fi

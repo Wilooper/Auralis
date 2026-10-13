@@ -20,6 +20,7 @@ fun WebEmbedScreen(entry: ExtensionRegistry.Entry, close: () -> Unit) {
     var web by remember { mutableStateOf<WebView?>(null) }
     var message by remember { mutableStateOf("Tap the provider’s play control to start. Only approved HTTPS origins can load.") }
     val owner = LocalLifecycleOwner.current
+    val dashboard = entry.manifest.web?.optString("role", "player") == "dashboard"
     DisposableEffect(owner) {
         val observer = LifecycleEventObserver { _, event ->
             if(event == Lifecycle.Event.ON_STOP) { web?.loadUrl("about:blank"); web?.onPause(); close() }
@@ -28,8 +29,8 @@ fun WebEmbedScreen(entry: ExtensionRegistry.Entry, close: () -> Unit) {
         onDispose { network.close(); owner.lifecycle.removeObserver(observer); web?.apply { stopLoading(); onPause(); removeAllViews(); destroy() }; web = null }
     }
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) { Text(entry.manifest.name, Modifier.weight(1f).padding(top = 12.dp), style = MaterialTheme.typography.titleMedium); TextButton(close) { Text("Close web player") } }
-        Text(message, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) { Text(if(dashboard) "${entry.manifest.name} dashboard" else entry.manifest.name, Modifier.weight(1f).padding(top = 12.dp), style = MaterialTheme.typography.titleMedium); TextButton(close) { Text(if(dashboard) "Close dashboard" else "Close web player") } }
+        Text(if(dashboard) "Sandboxed developer dashboard · approved origins only" else message, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
         AndroidView(modifier = Modifier.fillMaxWidth().weight(1f), factory = { context ->
             WebView(context).apply {
                 web = this
@@ -58,13 +59,13 @@ fun WebEmbedScreen(entry: ExtensionRegistry.Entry, close: () -> Unit) {
                     }
                     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler, error: android.net.http.SslError?) { handler.cancel() }
                     override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean { view?.destroy(); web = null; message = "Web renderer stopped. Close and reopen the embed."; return true }
-                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) { if(url != "about:blank" && url != "https://auralis.invalid/") message = "Loading approved web player…" }
-                    override fun onPageFinished(view: WebView?, url: String?) { message = "Web controls are separate from Auralis playback. Some providers disallow embedding." }
+                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) { if(url != "about:blank" && url != "https://reva.invalid/") message = "Loading approved web player…" }
+                    override fun onPageFinished(view: WebView?, url: String?) { message = "Web controls are separate from ReVa playback. Some providers disallow embedding." }
                 }
                 val url = entry.manifest.web!!.getString("url")
                 val sources = entry.manifest.origins.joinToString(" ")
                 val html = """<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; frame-src $sources; style-src 'unsafe-inline';"><style>html,body,iframe{margin:0;width:100%;height:100%;border:0;background:#09090c}</style></head><body><iframe title="Music provider" sandbox="allow-scripts allow-same-origin" allow="autoplay" referrerpolicy="no-referrer" src="${android.text.TextUtils.htmlEncode(url)}"></iframe></body></html>"""
-                loadDataWithBaseURL("https://auralis.invalid/", html, "text/html", "UTF-8", null)
+                loadDataWithBaseURL("https://reva.invalid/", html, "text/html", "UTF-8", null)
             }
         })
     }

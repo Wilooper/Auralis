@@ -1,0 +1,18 @@
+{
+  "apiVersion": 1,
+  "id": "org.reva.visualstyles",
+  "name": "ReVa Visual Styles",
+  "version": "1.0.0",
+  "capabilities": ["skin.apply"],
+  "origins": [],
+  "skin": {
+    "primary": "#84F2D2",
+    "background": "#09090C",
+    "surface": "#19191F",
+    "text": "#F8F6F7",
+    "muted": "#ADABB6",
+    "artworkStyle": "ascii",
+    "coverMotion": "turntable",
+    "seekBarStyles": ["classic", "pill", "segmented", "wave"]
+  }
+}

@@ -4,14 +4,16 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import app.auralis.AuralisApplication
+import app.auralis.ReVaApplication
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.json.JSONObject
+import java.net.URI
+import java.net.HttpURLConnection
 
 data class ExtensionState(val busy: Boolean = false, val message: String? = null, val tracks: List<ExtensionBridge.RemoteTrack> = emptyList(), val provider: String? = null, val party: JSONObject? = null)
 class ExtensionViewModel(application: Application) : AndroidViewModel(application) {
-    val bridge = (application as AuralisApplication).extensionBridge
+    val bridge = (application as ReVaApplication).extensionBridge
     val registry = bridge.registry
     val entries = registry.entries
     private val mutable = MutableStateFlow(ExtensionState())
@@ -36,6 +38,25 @@ class ExtensionViewModel(application: Application) : AndroidViewModel(applicatio
         mutable.value = mutable.value.copy(message = "Your custom style is applied. Disable it here to restore your previous skin.")
     }
     fun importFile(uri: Uri) = run { val entry = withContext(Dispatchers.IO) { registry.importFile(uri) }; mutable.value = mutable.value.copy(message = "${entry.manifest.name} imported. Review permissions to enable it.") }
+    fun importUrl(source: String) = run {
+        val entry = withContext(Dispatchers.IO) {
+            val uri = githubManifestUri(source)
+            val connection = (uri.toURL().openConnection() as HttpURLConnection).apply {
+                instanceFollowRedirects = false
+                connectTimeout = 8_000
+                readTimeout = 12_000
+                requestMethod = "GET"
+                setRequestProperty("Accept", "application/json, text/plain;q=0.9")
+                setRequestProperty("User-Agent", "ReVa-Android")
+            }
+            try {
+                require(connection.responseCode == HttpURLConnection.HTTP_OK) { "GitHub returned HTTP ${connection.responseCode}; redirects are blocked" }
+                val bytes = connection.inputStream.use { it.readBytesBounded(ExtensionManifest.MAX_BYTES) }
+                registry.install(String(bytes, Charsets.UTF_8))
+            } finally { connection.disconnect() }
+        }
+        mutable.value = mutable.value.copy(message = "${entry.manifest.name} imported from GitHub. Review permissions to enable it.")
+    }
     fun toggle(id: String, enabled: Boolean, grants: Set<String>? = null) = run { withContext(Dispatchers.IO) { if(grants == null) registry.enable(id, enabled) else registry.enable(id, enabled, grants) } }
     fun remove(id: String) = run { withContext(Dispatchers.IO) { registry.remove(id) } }
     fun chooseSeekBarStyle(id: String, style: String) = run { withContext(Dispatchers.IO) { registry.chooseSeekBarStyle(id, style) } }
@@ -51,4 +72,22 @@ class ExtensionViewModel(application: Application) : AndroidViewModel(applicatio
         run { val response = bridge.call(id,BridgeRequest(java.util.UUID.randomUUID().toString(),1,"party.session","party","request",JSONObject().put("action",action).put("session",session).put("trackId",track))).getJSONObject("result"); mutable.value = mutable.value.copy(party = response, message = "Party $action completed") }
     }
     fun cancel() { job?.cancel(); mutable.value.provider?.let(bridge::cancelRequests); mutable.value = mutable.value.copy(busy = false, message = "Request canceled") }
+}
+
+internal fun githubManifestUri(source: String): URI {
+    require(source.length <= 2048 && !source.contains('\\')) { "Invalid GitHub URL" }
+    val input = URI(source)
+    require(input.scheme == "https" && input.rawUserInfo == null && input.port in setOf(-1, 443) && input.rawFragment == null) { "Use a public HTTPS GitHub link" }
+    val normalized = when (input.host?.lowercase()) {
+        "raw.githubusercontent.com" -> input.also { require(it.rawQuery == null) { "Query strings are not accepted" } }
+        "github.com" -> {
+            require(input.rawQuery == null) { "Query strings are not accepted" }
+            val parts = input.path.split('/').filter(String::isNotEmpty)
+            require(parts.size >= 5 && parts[2] == "blob") { "Use a GitHub file link or raw manifest link" }
+            URI("https", "raw.githubusercontent.com", "/${parts[0]}/${parts[1]}/${parts.drop(3).joinToString("/")}", null)
+        }
+        else -> error("Only github.com and raw.githubusercontent.com links are supported")
+    }
+    require(normalized.host.equals("raw.githubusercontent.com", true) && normalized.scheme == "https" && normalized.rawUserInfo == null && normalized.port == -1) { "Invalid public GitHub URL" }
+    return normalized
 }

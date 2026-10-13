@@ -18,6 +18,8 @@ internal fun SkinEditor(current: Skin, dismiss: () -> Unit, save: (JSONObject) -
     var layout by remember { mutableStateOf(current.layout) }
     var font by remember { mutableStateOf(current.font) }
     var atmosphere by remember { mutableStateOf(current.atmosphere) }
+    var artworkStyle by remember { mutableStateOf(current.artworkStyle) }
+    var coverMotion by remember { mutableStateOf(current.coverMotion) }
     var error by remember { mutableStateOf<String?>(null) }
     AlertDialog(onDismissRequest = dismiss, title = { Text("Your custom style") }, text = {
         LazyColumn(Modifier.heightIn(max = 450.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -29,10 +31,12 @@ internal fun SkinEditor(current: Skin, dismiss: () -> Unit, save: (JSONObject) -
             item { Text("Corners · ${radius.toInt()} dp"); Slider(radius,{ radius = it },valueRange=0f..32f,steps=31) }
             item { Text("Library layout"); listOf("standard","compact","covers").forEach { value -> FilterChip(layout == value,{ layout = value },label = { Text(value.replaceFirstChar { it.titlecase() }) }) } }
             item { Text("Typeface"); listOf("sans","serif","mono").forEach { value -> FilterChip(font == value,{ font = value },label = { Text(value.replaceFirstChar { it.titlecase() }) }) } }
+            item { Text("Cover art treatment"); listOf("image", "ascii", "monochrome", "duotone").forEach { value -> FilterChip(artworkStyle == value, { artworkStyle = value }, label = { Text(value.replaceFirstChar { it.titlecase() }) }) } }
+            item { Text("Now playing cover animation"); listOf("none", "pulse", "turntable").forEach { value -> FilterChip(coverMotion == value, { coverMotion = value }, label = { Text(value.replaceFirstChar { it.titlecase() }) }) } }
             item { Row { Text("Artwork atmosphere",Modifier.weight(1f)); Switch(atmosphere,{ atmosphere = it }) } }
         }
     }, confirmButton = { TextButton({
-        val json = JSONObject().apply { colors.forEach { (k,v) -> put(k,v) }; put("textScale",scale); put("rowHeight",row.toInt()); put("artworkSize",art.toInt()); put("cornerRadius",radius.toInt()); put("layout",layout); put("font",font); put("atmosphere",atmosphere) }
+        val json = JSONObject().apply { colors.forEach { (k,v) -> put(k,v) }; put("textScale",scale); put("rowHeight",row.toInt()); put("artworkSize",art.toInt()); put("cornerRadius",radius.toInt()); put("layout",layout); put("font",font); put("atmosphere",atmosphere); put("artworkStyle", artworkStyle); put("coverMotion", coverMotion) }
         try { Skin.parse(json); save(json) } catch(e: Exception) { error = e.message }
     }) { Text("Apply style") } }, dismissButton = { TextButton(dismiss) { Text("Cancel") } })
 }

@@ -29,9 +29,9 @@ fun ExtensionScreen(entries: List<ExtensionRegistry.Entry>, state: ExtensionStat
     val entry = enabled.firstOrNull { it.manifest.id == selected }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
-            Text("Make Auralis yours", style = MaterialTheme.typography.headlineSmall)
+            Text("Make ReVa yours", style = MaterialTheme.typography.headlineSmall)
             Text("File-based extensions · SDK v1", color = MaterialTheme.colorScheme.primary)
-            Text("Import a .auralis.json file, review its access, then turn it on. Extensions use Auralis APIs; they cannot install code or access your files.", Modifier.padding(top = 8.dp))
+            Text("Import an extension file or a public GitHub manifest, review its access, then enable it. Extensions use ReVa APIs; they cannot install native code or access your files.", Modifier.padding(top = 8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("Extensions", "Internet", "Party").forEach { FilterChip(mode == it, { mode = it; selected = null }, label = { Text(it) }) }
             }
@@ -40,6 +40,9 @@ fun ExtensionScreen(entries: List<ExtensionRegistry.Entry>, state: ExtensionStat
         }
         if(mode == "Extensions") {
             item { Button(import, Modifier.fillMaxWidth(), enabled = !state.busy) { Text("Import extension file") }
+                var sourceUrl by remember { mutableStateOf("") }
+                OutlinedTextField(sourceUrl, { sourceUrl = it.take(2048) }, Modifier.fillMaxWidth(), label = { Text("Public GitHub manifest URL") }, singleLine = true, enabled = !state.busy)
+                OutlinedButton({ model.importUrl(sourceUrl); sourceUrl = "" }, Modifier.fillMaxWidth(), enabled = !state.busy && sourceUrl.isNotBlank()) { Text("Import from GitHub") }
                 OutlinedButton({ styleEditor = true }, Modifier.fillMaxWidth(), enabled = !state.busy) { Text("Customize appearance") }
                 Text("Updates replace the same ID and disable it for a fresh review. Maximum 24 installed extensions.", style = MaterialTheme.typography.bodySmall) }
             if(entries.isEmpty()) item { Text("Your extension collection starts here. Try a community provider or a custom skin.") }
@@ -66,15 +69,18 @@ fun ExtensionScreen(entries: List<ExtensionRegistry.Entry>, state: ExtensionStat
                     }
                 }
             }
-            item { Text("Skins control colors, typography, cover size, rows, corners, library layout and player seek bar styles. The last enabled skin wins; disabling it restores the previous style.", style = MaterialTheme.typography.bodySmall)
+            item { Text("Skins control colors, typography, cover size, rows, corners, library layout, artwork filters, playback animations and seek bar styles. The last enabled skin wins; disabling it restores the previous style.", style = MaterialTheme.typography.bodySmall)
                 Text("No background polling, downloaded scripts, APKs, native plugins, or store downloads in SDK v1.", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.bodySmall) }
         } else {
             val choices = enabled.filter { if(mode == "Party") "party.session" in it.grants && it.manifest.party != null else ("catalog.read" in it.grants && it.manifest.provider != null) || ("web.embed" in it.grants && it.manifest.web != null) }
             if(choices.isEmpty()) item { Text("Enable a ${if(mode == "Party") "party" else "provider or web embed"} extension first.") }
             items(choices, key = { it.manifest.id }) { row -> FilterChip(selected == row.manifest.id, { selected = row.manifest.id; query = ""; if(row.manifest.provider != null && "catalog.read" in row.grants && mode == "Internet") model.browse(selected!!, "") }, label = { Text(row.manifest.name) }) }
             if(entry != null && mode == "Internet") {
-                if(entry.manifest.web != null && "web.embed" in entry.grants) item { OutlinedButton({ embed(entry.manifest.id) }, Modifier.fillMaxWidth()) { Text("Open sandboxed web player") }
-                    Text("Web playback has separate controls. The provider may block iframes. Close it before returning to native playback.", style = MaterialTheme.typography.bodySmall) }
+                if(entry.manifest.web != null && "web.embed" in entry.grants) item {
+                    val dashboard = entry.manifest.web.optString("role", "player") == "dashboard"
+                    OutlinedButton({ embed(entry.manifest.id) }, Modifier.fillMaxWidth()) { Text(if(dashboard) "Open developer dashboard" else "Open sandboxed web player") }
+                    Text(if(dashboard) "This extension dashboard runs in a sandboxed web view and can only reach its approved HTTPS origins." else "Web playback has separate controls. The provider may block iframes. Close it before returning to native playback.", style = MaterialTheme.typography.bodySmall)
+                }
                 if(entry.manifest.provider != null && "catalog.read" in entry.grants) {
                     item { OutlinedTextField(query, { query = it.take(200) }, label = { Text("Search your server") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                         Button({ model.browse(entry.manifest.id, query) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) { Text("Fetch songs") } }
