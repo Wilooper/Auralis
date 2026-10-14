@@ -20,7 +20,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-private val extensionModes = listOf("Extensions", "Internet", "Party")
+private val extensionModes = listOf("Native", "Extensions", "Internet", "Party")
 
 @Composable
 fun ExtensionScreen(
@@ -40,9 +40,15 @@ fun ExtensionScreen(
     var selected by remember { mutableStateOf<String?>(null) }
     var query by remember { mutableStateOf("") }
     var sourceUrl by remember { mutableStateOf("") }
-    var mode by remember { mutableStateOf("Extensions") }
+    var mode by remember { mutableStateOf("Native") }
     var session by remember { mutableStateOf("") }
     var track by remember { mutableStateOf("") }
+    if (mode == "Native") { Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            extensionModes.forEach { value -> TextButton(onClick = { mode = value }) { Text(value) } }
+        }
+        CompanionScreen()
+    }; return }
     val enabled = entries.filter { it.enabled }
     val entry = enabled.firstOrNull { it.manifest.id == selected }
     val modeTitle = when (mode) { "Internet" -> "Connected services"; "Party" -> "Listening party"; else -> "Extensions" }

@@ -6,4 +6,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = "ReVa"
-include(":app", ":core-model", ":core-playback")
+include(":app", ":core-model", ":core-playback", ":extension-sdk", ":sample-extension")

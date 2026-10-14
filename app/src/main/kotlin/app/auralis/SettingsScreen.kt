@@ -27,6 +27,7 @@ internal fun SettingsScreen(state: PlayerScreenState, model: PlayerViewModel, ho
     var remove by remember { mutableStateOf<LibrarySource?>(null) }
     var clear by remember { mutableStateOf(false) }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        item { app.auralis.extensions.CompanionActions("settings") }
         item {
             Surface(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainer) {
                 Row(Modifier.clickable(onClick = openExtensions).padding(18.dp), verticalAlignment = Alignment.CenterVertically) {

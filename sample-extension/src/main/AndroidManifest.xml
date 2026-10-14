@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries><package android:name="app.auralis" /></queries>
+    <application android:label="ReVa Track Inspector" android:allowBackup="false" android:supportsRtl="true">
+        <service android:name=".InspectorService" android:exported="true" android:isolatedProcess="true" android:process=":worker">
+            <intent-filter><action android:name="app.reva.extension.WORKER" /></intent-filter>
+            <meta-data android:name="app.reva.extension.MANIFEST" android:resource="@raw/extension" />
+        </service>
+    </application>
+</manifest>

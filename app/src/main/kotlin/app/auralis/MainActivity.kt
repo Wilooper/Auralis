@@ -46,8 +46,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
         )
         if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         setContent {
@@ -56,9 +56,16 @@ class MainActivity : ComponentActivity() {
             val extensions: ExtensionViewModel = viewModel()
             val entries by extensions.entries.collectAsStateWithLifecycle()
             val skin = entries.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }?.manifest?.skin
+            SideEffect {
+                val dark = androidx.core.graphics.ColorUtils.calculateLuminance(android.graphics.Color.parseColor(skin?.background ?: "#FAF8F5")) <= .5
+                val bar = if (dark) SystemBarStyle.dark(android.graphics.Color.TRANSPARENT) else SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                enableEdgeToEdge(statusBarStyle = bar, navigationBarStyle = bar)
+            }
             ReVaTheme(state.accent, skin) { ReVaScreen(state, model) }
         }
     }
+    override fun onStart() { super.onStart(); (application as ReVaApplication).companions.visibility(true) }
+    override fun onStop() { (application as ReVaApplication).companions.visibility(false); super.onStop() }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -190,6 +197,7 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
         model.playFlow(tracks)
         flowDialog = false
     }
+    CompanionPanelDialog()
 
 }
 

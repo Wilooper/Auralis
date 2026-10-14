@@ -62,10 +62,10 @@ data class ExtensionManifest(val id: String, val name: String, val version: Stri
     }
 }
 
-data class Skin(val primary: String = "#69E0BE", val background: String = "#09090C", val surface: String = "#19191F",
-    val text: String = "#F8F6F7", val muted: String = "#ADABB6", val textScale: Float = 1f,
+data class Skin(val primary: String = "#006B5E", val background: String = "#FAF8F5", val surface: String = "#FFFFFF",
+    val text: String = "#202725", val muted: String = "#59645F", val textScale: Float = 1f,
     val rowHeight: Int = 72, val cornerRadius: Int = 18, val artworkSize: Int = 56,
-    val layout: String = "standard", val font: String = "sans", val atmosphere: Boolean = true,
+    val layout: String = "standard", val font: String = "sans", val atmosphere: Boolean = false,
     val seekBarStyles: List<String> = listOf("classic"), val seekBarStyle: String = seekBarStyles.first(),
     val artworkStyle: String = "image", val coverMotion: String = "none") {
     companion object {
@@ -77,9 +77,9 @@ data class Skin(val primary: String = "#69E0BE", val background: String = "#0909
                 (0 until array.length()).map { array.getString(it) }
             } ?: listOf("classic")
             require(options.isNotEmpty() && options.size <= 4 && options.distinct() == options && options.all { it in supportedSeekBarStyles }) { "Invalid seek bar styles" }
-            val skin = Skin(color("primary", "#69E0BE"), color("background", "#09090C"), color("surface", "#19191F"), color("text", "#F8F6F7"), color("muted", "#ADABB6"),
+            val skin = Skin(color("primary", "#006B5E"), color("background", "#FAF8F5"), color("surface", "#FFFFFF"), color("text", "#202725"), color("muted", "#59645F"),
                 json.optDouble("textScale", 1.0).toFloat(), json.optInt("rowHeight", 72), json.optInt("cornerRadius", 18), json.optInt("artworkSize", 56),
-                json.optString("layout", "standard"), json.optString("font", "sans"), json.optBoolean("atmosphere", true), options,
+                json.optString("layout", "standard"), json.optString("font", "sans"), json.optBoolean("atmosphere", false), options,
                 artworkStyle = json.optString("artworkStyle", "image"), coverMotion = json.optString("coverMotion", "none"))
             require(skin.textScale.isFinite() && skin.textScale in .85f..1.3f && skin.rowHeight in 64..112 && skin.cornerRadius in 0..32 && skin.artworkSize in 40..80) { "Skin exceeds accessibility/layout limits" }
             require(skin.layout in setOf("standard", "compact", "covers") && skin.font in setOf("sans", "serif", "mono")) { "Unsupported skin layout or font" }
