@@ -35,6 +35,8 @@ Native C++/Rust can be packaged as Android `.so` libraries inside the companion 
 
 The Native page lists the last 100 host-controlled task/network lifecycle events. Raw extension exceptions, request URLs, credentials and response bodies are not logged. CPU/RAM attribution and native symbolication require further device tooling; the event list is not a full debugger. Cancel tasks, disable an extension or change its grants to invalidate outstanding sessions.
 
+Three worker/protocol failures in a host session suspend the extension and clear its grants. Review access again to retry. Admission gates reject excess Binder requests before posting to the main looper; terminal callbacks are accepted at most once. Pending network jobs and deadline timers are cancelled when a session ends.
+
 ## YAML distribution envelope (planned, not an executable loader)
 
 YAML describes a precompiled companion release. It must contain only schema-defined data: manifest version, extension/package identity, display name, host SDK range, immutable artifact URL, artifact SHA-256, publisher certificate SHA-256, supported Android/ABI versions, capability summary and a dependency inventory with versions/licences. APK-internal metadata remains authoritative after installation. A remotely supplied hash is not publisher authentication; signatures and a trusted/explicitly accepted publisher identity are separate requirements.

@@ -28,7 +28,7 @@ class ExtensionSecurityTest {
     }
     @Test fun unknownVersionsAndContributionCapabilitiesAreRejected() { denied { ExtensionManifest.parse(manifest().replace("\"apiVersion\":1", "\"apiVersion\":2")) }; denied { ExtensionManifest.parse(manifest().replace("\"catalog.read\",", "")) } }
     @Test fun parsingBoundsBytesDepthAndTrailingContent() { denied { ExtensionManifest.parse(" ".repeat(65_537)) }; denied { ExtensionManifest.parse("[".repeat(17)+"]".repeat(17)) }; denied { ExtensionManifest.parse(manifest()+" trailing") } }
-    @Test fun safeSkinRejectsUnreadableColorsAndExtremeLayout() { denied { Skin.parse(JSONObject().put("textScale",4)) }; denied { Skin.parse(JSONObject().put("background","#FFFFFF")) }; denied { Skin.parse(JSONObject().put("rowHeight",1)) }; assertEquals("compact", Skin.parse(JSONObject().put("layout","compact")).layout) }
+    @Test fun safeSkinRejectsUnreadableColorsAndExtremeLayout() { denied { Skin.parse(JSONObject().put("textScale",4)) }; denied { Skin.parse(JSONObject().put("background","#FFFFFF").put("text","#FFFFFF")) }; denied { Skin.parse(JSONObject().put("rowHeight",1)) }; assertEquals("compact", Skin.parse(JSONObject().put("layout","compact")).layout) }
     @Test fun visualTreatmentsAreDeclarativeAndBounded() {
         assertEquals("ascii", Skin.parse(JSONObject().put("artworkStyle", "ascii")).artworkStyle)
         assertEquals("turntable", Skin.parse(JSONObject().put("coverMotion", "turntable")).coverMotion)

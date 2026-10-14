@@ -8,7 +8,7 @@ class ExtensionTaskPolicy(private val clock: () -> Long, private val globalLimit
     private var visible = false
 
     @Synchronized fun begin(task: String, extension: String, backgroundGranted: Boolean): Lease {
-        require(task.isNotBlank() && extension.isNotBlank() && task.length <= 80 && extension.length <= 160)
+        require(task.isNotBlank() && extension.isNotBlank() && task.length <= 80 && extension.length <= 512)
         check(visible || backgroundGranted) { "Open ReVa to run this task" }
         check(task !in active) { "Duplicate task" }
         check(active.size < globalLimit) { "Two tasks are already running" }
