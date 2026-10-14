@@ -27,6 +27,8 @@ The manifest resource is a strict JSON object: `sdk` (2), `name`, `capabilities`
 
 Maximum two compute tasks globally, one per companion, thirty seconds per action. Leaving ReVa cancels foreground-only sessions; the host disconnects the worker and revokes its private bridge. Approved background tasks can continue only within their existing deadline. Playback remains in the existing media service.
 
+Cancelled actions currently restart when invoked again; resumable host-stored checkpoints are a future task-contract addition. They are not silently retained in an isolated worker after disconnect.
+
 Cooperative SDK workers are single-threaded and have a self-termination watchdog. Host limits control admitted tasks, bridge calls and bindings. Android controls isolated-process cleanup; this is **not** an OS-enforced CPU/RAM quota for arbitrary companion APK components. A separate APK can contain other components and request its own Android permissions. No malware-free or hard resource-quota claim is made. Profile unbinding, native cancellation and process death on device before expanding this runtime.
 
 Native C++/Rust can be packaged as Android `.so` libraries inside the companion APK and called through JNI from the isolated worker. Compile dependencies on the publisher's machine/CI for the target Android ABIs. Keep audio work out of the action protocol: PCM transport, realtime budgets, audio focus and engine selection need dedicated adapters. Do not send samples one by one over Binder. The first SDK rejects undeveloped engine/decoder capabilities instead of pretending they work.
@@ -40,5 +42,7 @@ Three worker/protocol failures in a host session suspend the extension and clear
 ## YAML distribution envelope (planned, not an executable loader)
 
 YAML describes a precompiled companion release. It must contain only schema-defined data: manifest version, extension/package identity, display name, host SDK range, immutable artifact URL, artifact SHA-256, publisher certificate SHA-256, supported Android/ABI versions, capability summary and a dependency inventory with versions/licences. APK-internal metadata remains authoritative after installation. A remotely supplied hash is not publisher authentication; signatures and a trusted/explicitly accepted publisher identity are separate requirements.
+
+The proposed data envelope is specified in `companion-distribution.schema.json`. The schema itself cannot enforce immutable URLs, safe DNS, publisher trust or APK consistency; those are required importer checks. It does not activate undeveloped engine capabilities.
 
 No YAML command, script, tag, anchor, dependency installation instruction or source URL will be executed on device. The current Native page discovers installed APKs; YAML link review/download/installer handoff will be added only with the dedicated distribution verification flow. This avoids representing a YAML preview as a working native installer.

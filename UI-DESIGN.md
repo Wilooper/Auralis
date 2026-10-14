@@ -1,4 +1,16 @@
-# Auralis 0.4 — Default interface
+# ReVa 0.6 — Light base interface
+
+The stock theme uses ivory `#FAF8F5`, white surfaces, deep teal `#006B5E`, dark text `#202725` and secondary text `#59645F`. Accent choices use dark tones with white control icons. Explicit custom dark skins remain supported, with automatic light/dark Material roles and matching system-bar icon appearance. Artwork atmosphere is optional and defaults off.
+
+The player keeps a large square cover, readable metadata, a simple seekbar, transport controls and extension action slots. Lyrics use neutral readable inactive lines and teal active words; font scaling applies to lyric text. Original embedded artwork is cached without JPEG recompression, within the existing byte/dimension/cache bounds, then Coil decodes for the visible display size (up to 2048 pixels). This improves on the previous fixed 128-pixel player request without claiming source resolution that does not exist.
+
+Coil's memory cache is limited to the smaller of 10% of the app heap and 24 MiB. Its additional disk cache is disabled because the original artwork provider already maintains a bounded source cache. Active bitmap allocations are not included in the cache-size limit; profile real devices before claiming total memory use.
+
+Installed companions contribute icons/actions to player, library and settings; results are rendered as native text panels. Permissions and diagnostics live under Extensions → Native. See `sdk/COMPANION-SDK.md` for the current protocol and its limits.
+
+REA was not installed or executed for this change. Sizes remain original proposed layout choices, not measured Apple/SimpMusic ratios. Runtime screenshots, large-font/landscape review, frame timing and battery behaviour require device verification.
+
+## Historical 0.4 design notes
 
 The default design combines an immersive Apple Music-inspired listening experience with dark discovery surfaces inspired by Spotify, YouTube Music and Tidal. Auralis keeps its own name, original layouts and icons; third-party screenshots, logos, fonts and artwork are not bundled.
 

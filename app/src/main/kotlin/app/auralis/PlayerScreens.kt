@@ -264,25 +264,26 @@ internal fun LyricsView(state: PlayerScreenState, model: PlayerViewModel, import
             LaunchedEffect(active, following) { if (following && active >= 0) list.animateScrollToItem(active) }
             Row(Modifier.fillMaxWidth().padding(horizontal = 26.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(when (lyrics.timing) { LyricsTiming.WORD -> "WORD SYNC"; LyricsTiming.LINE -> "LINE SYNC"; LyricsTiming.PLAIN -> "PLAIN LYRICS" },
-                    Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f))
+                    Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (lyrics.isTimed && !following) TextButton(onClick = { following = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) { Text("Follow lyrics") }
             }
             LazyColumn(Modifier.weight(1f).fillMaxWidth().nestedScroll(gesture), state = list, contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 56.dp, bottom = 180.dp)) {
                 itemsIndexed(lyrics.lines) { index, line ->
                     val current = index == active
-                    val base by animateColorAsState(if (current || !lyrics.isTimed) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = if (index < active) .55f else .46f), tween(260), label = "Lyric emphasis")
+                    val base by animateColorAsState(if (current) MaterialTheme.colorScheme.primary else if (!lyrics.isTimed) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant, tween(260), label = "Lyric emphasis")
                     val text = buildAnnotatedString {
                         if (current && line.words.isNotEmpty()) {
                             val clock = state.positionMs + lyrics.offsetMs
                             line.words.forEachIndexed { wordIndex, word ->
                                 val end = word.endTimeMs ?: line.words.getOrNull(wordIndex + 1)?.timeMs ?: line.endTimeMs ?: lyrics.lines.getOrNull(index + 1)?.timeMs ?: Long.MAX_VALUE
-                                val color = when { clock >= word.timeMs && clock < end -> MaterialTheme.colorScheme.onSurface; clock >= word.timeMs -> MaterialTheme.colorScheme.onSurface.copy(alpha = .78f); else -> MaterialTheme.colorScheme.onSurface.copy(alpha = .48f) }
+                                val color = when { clock >= word.timeMs && clock < end -> MaterialTheme.colorScheme.primary; clock >= word.timeMs -> MaterialTheme.colorScheme.onSurface; else -> MaterialTheme.colorScheme.onSurfaceVariant }
                                 withStyle(SpanStyle(color = color)) { append(word.text) }
                             }
                         } else append(line.text.ifBlank { "…" })
                     }
                     Text(text, Modifier.fillMaxWidth().clickable(enabled = lyrics.isTimed && state.seekable) { model.seek((line.timeMs - lyrics.offsetMs).coerceAtLeast(0)); following = true }
-                        .padding(vertical = 14.dp), fontSize = 30.sp, lineHeight = 38.sp, fontWeight = FontWeight.Bold, letterSpacing = (-.5).sp, color = base)
+                        .padding(vertical = 14.dp), fontSize = 30.sp * LocalSkin.current.textScale, lineHeight = 38.sp * LocalSkin.current.textScale,
+                        fontWeight = if (current) FontWeight.Bold else FontWeight.SemiBold, letterSpacing = (-.5).sp, color = base)
                 }
             }
         }

@@ -48,5 +48,6 @@ class CompanionSecurityTest {
         assertEquals("#FAF8F5", stock.background); assertFalse(stock.atmosphere)
         for (foreground in listOf(stock.text, stock.muted)) assertTrue(ColorUtils.calculateContrast(android.graphics.Color.parseColor(foreground), android.graphics.Color.parseColor(stock.background)) >= 4.5)
         assertEquals("#09090C", Skin.parse(JSONObject().put("background", "#09090C").put("surface", "#19191F").put("text", "#F8F6F7").put("muted", "#ADABB6")).background)
+        assertEquals("#F8F6F7", Skin.parse(JSONObject().put("background", "#09090C")).text)
     }
 }

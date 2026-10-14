@@ -1,6 +1,8 @@
-# ReVa — 0.5.1-dev
+# ReVa — 0.6.0-dev
 
-ReVa keeps the existing local music player and adds a reviewed extension foundation: HTTPS music providers, server-hosted party queues, sandboxed web players and developer dashboards, and declarative UI skins with ASCII/monochrome/duotone artwork and low-cost cover animation presets. Open Settings → Extensions & internet to import/review/toggle extensions or customize appearance. Extensions are data-only; approved server requests and sandboxed web views are permission-gated. No native extension code runs on the phone.
+ReVa keeps the existing local music player, adds a warm light theme and an installed companion-extension action SDK. Open Settings → Extensions → Native to review publisher identities, grant access and run companion features. Workers start only on demand, with task deadlines, foreground/background permission controls and bounded diagnostics. Install the Track Inspector sample APK from the workflow artifact to try a player action and a settings panel.
+
+Existing JSON/data extensions, HTTPS providers, sandboxed web dashboards and declarative skins remain compatible. No built-in AI, online lyrics provider, equalizer or Dolby processing is added. Engine replacement and YAML-driven companion installation require the follow-up integration gates; this action SDK does not claim those features are implemented. See the [implementation plan](docs/REVA-BASE-IMPLEMENTATION-PLAN.md) and [companion SDK guide](sdk/COMPANION-SDK.md).
 
 See [SDK guide](sdk/README.md), [REST OpenAPI](sdk/openapi.json), [manifest schema](sdk/manifest.schema.json), [host bridge schema](sdk/host-bridge.schema.json), and [v5 notes](V5-SDK.md).
 
@@ -16,8 +18,9 @@ A local-first Android music player. The current development prototype uses Kotli
 - Home with recently added/played songs, songs/artists/albums browsing and Unicode song/artist/album search.
 - Lazy embedded artwork with a bounded disk cache, song-row covers and a mini player.
 - Saved queue and position checkpoint; recovery is paused until you press Play.
-- New dark discovery layout with cover shelves, album/artist grids and a rose default accent.
-- Immersive player and large synchronized lyrics over a cached soft album-art backdrop.
+- Light discovery layout with warm neutral surfaces, deep teal accents, cover shelves and album/artist grids. Explicit custom dark skins remain supported.
+- Large synchronized lyrics with readable inactive lines and accent-highlighted active words; artwork atmosphere is optional.
+- Original embedded artwork retained in a bounded cache and decoded for the display size, avoiding fixed 128-pixel full-player covers.
 - Floating mini player; Music/Lyrics switching and lyrics follow that pauses while reading ahead.
 - LibVLC decoding, play/pause/seek, previous/next, shuffle and repeat off/all/one.
 - Persistent Favorites and service-recorded History; Home/Favorites/Queue/Lyrics navigation.
@@ -41,7 +44,7 @@ Compilation is not device verification. Read [BUILD-RESULTS.md](BUILD-RESULTS.md
 Install JDK 17 and Android SDK platform 36 / build tools 35.0.0. Android Studio can install these. Set `ANDROID_HOME` to your SDK directory, or put `sdk.dir=/absolute/path/to/sdk` in an untracked `local.properties` file.
 
 ```sh
-./gradlew :core-model:test :app:testDebugUnitTest :core-playback:lintDebug :app:lintDebug :app:assembleDebug
+./gradlew :core-model:test :app:testDebugUnitTest :core-playback:lintDebug :extension-sdk:lintDebug :sample-extension:lintDebug :app:lintDebug :app:assembleDebug :sample-extension:assembleDebug
 ```
 
 Windows: use `gradlew.bat`. Dependencies and wrapper distribution are pinned, with lockfiles for the verified configurations. The Gradle distribution checksum is verified; builds still require network access for dependencies on first use.
@@ -52,7 +55,7 @@ APK outputs are in `app/build/outputs/apk/debug/`. Prefer the `arm64-v8a` APK on
 
 1. Open **Settings** to add a music folder or individual files, then allow music access for the fast Android index. Saved folders and songs return after killing/reopening the app. Folder grants from 0.2 are recovered where Android still retains them. Actual decoding support depends on LibVLC.
 2. Play a track and open **Lyrics**. Embedded lyrics load automatically for the current track. Word sync highlights timed words; line sync scrolls to the current line; plain lyrics remain freely scrollable. Attach an LRC, TXT or supported TTML file with the folder icon; the restore icon switches back to embedded lyrics.
-3. Open **Settings** to change the accent or enable crossfade/DJ blend. Open **Extensions & internet** to import extensions, approve permissions, connect providers or edit appearance.
+3. Open **Settings** to change the accent or enable crossfade/DJ blend. Open **Extensions → Native** for installed companion APKs; the other tabs retain legacy JSON providers, skins and web dashboards.
 4. Tap the floating mini player to expand. Use Music/Lyrics below the player, the queue shortcut, or the collapse arrow/Android Back. Scroll timed lyrics to read ahead; use Follow lyrics to return, or wait six seconds.
 5. Test media controls and screen-off behavior using [DEVICE-CHECKLIST.md](DEVICE-CHECKLIST.md).
 

@@ -101,7 +101,8 @@ internal fun SettingsScreen(state: PlayerScreenState, model: PlayerViewModel, ho
                     Text("Choose ReVa’s accent color", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         accents.forEachIndexed { index, color -> IconButton(onClick = { model.accent(index) }, modifier = Modifier.size(48.dp).background(color, CircleShape)) {
-                            Icon(if(state.accent == index) Icons.Rounded.Check else Icons.Rounded.Palette, "Accent ${index+1}", tint = Color.Black)
+                            Icon(if(state.accent == index) Icons.Rounded.Check else Icons.Rounded.Palette,
+                                "${listOf("Teal", "Rose", "Indigo", "Ochre", "Plum")[index]} accent", tint = Color.White)
                         } }
                     }
                 }

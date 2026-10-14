@@ -77,7 +77,9 @@ data class Skin(val primary: String = "#006B5E", val background: String = "#FAF8
                 (0 until array.length()).map { array.getString(it) }
             } ?: listOf("classic")
             require(options.isNotEmpty() && options.size <= 4 && options.distinct() == options && options.all { it in supportedSeekBarStyles }) { "Invalid seek bar styles" }
-            val skin = Skin(color("primary", "#006B5E"), color("background", "#FAF8F5"), color("surface", "#FFFFFF"), color("text", "#202725"), color("muted", "#59645F"),
+            val background = color("background", "#FAF8F5")
+            val dark = androidx.core.graphics.ColorUtils.calculateLuminance(android.graphics.Color.parseColor(background)) <= .5
+            val skin = Skin(color("primary", if(dark) "#69E0BE" else "#006B5E"), background, color("surface", if(dark) "#19191F" else "#FFFFFF"), color("text", if(dark) "#F8F6F7" else "#202725"), color("muted", if(dark) "#ADABB6" else "#59645F"),
                 json.optDouble("textScale", 1.0).toFloat(), json.optInt("rowHeight", 72), json.optInt("cornerRadius", 18), json.optInt("artworkSize", 56),
                 json.optString("layout", "standard"), json.optString("font", "sans"), json.optBoolean("atmosphere", false), options,
                 artworkStyle = json.optString("artworkStyle", "image"), coverMotion = json.optString("coverMotion", "none"))

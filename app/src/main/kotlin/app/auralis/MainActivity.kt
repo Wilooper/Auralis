@@ -55,7 +55,8 @@ class MainActivity : ComponentActivity() {
             val state by model.state.collectAsStateWithLifecycle()
             val extensions: ExtensionViewModel = viewModel()
             val entries by extensions.entries.collectAsStateWithLifecycle()
-            val skin = entries.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }?.manifest?.skin
+            val skinEntry = entries.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }
+            val skin = skinEntry?.manifest?.skin?.let { value -> value.copy(seekBarStyle = skinEntry.seekBarStyle?.takeIf { it in value.seekBarStyles } ?: value.seekBarStyles.first()) }
             SideEffect {
                 val dark = androidx.core.graphics.ColorUtils.calculateLuminance(android.graphics.Color.parseColor(skin?.background ?: "#FAF8F5")) <= .5
                 val bar = if (dark) SystemBarStyle.dark(android.graphics.Color.TRANSPARENT) else SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)

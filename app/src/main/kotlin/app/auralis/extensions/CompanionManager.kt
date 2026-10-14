@@ -71,11 +71,11 @@ class CompanionManager(private val context: Context) {
         }).build()
     private data class Session(val entry: CompanionEntry, val connection: ServiceConnection,
         var bound: Boolean = false, var worker: IExtensionWorker? = null,
-        var deadline: Job? = null, var networkJob: Job? = null,
+        var deadline: Job? = null, var networkJob: Job? = null, var verification: Job? = null,
         val cancelled: java.util.concurrent.atomic.AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean(false))
 
     fun refresh() { val epoch = ++refreshEpoch; scope.launch {
-        val rows = withContext(Dispatchers.IO) { discover() }
+        val rows = withContext(Dispatchers.IO) { runCatching { discover() }.getOrDefault(emptyList()) }
         if (epoch != refreshEpoch) return@launch
         sessions.toMap().forEach { (task, session) ->
             if (rows.none { it.key == session.entry.key && it.identity == session.entry.identity }) finish(task, "package changed")
@@ -130,7 +130,7 @@ class CompanionManager(private val context: Context) {
         record(entry, if (grants.isEmpty()) "disabled" else "permissions updated")
     }
     fun visibility(visible: Boolean) {
-        policy.visibility(visible).forEach { finish(it.task, "paused: app left foreground") }
+        policy.visibility(visible).forEach { finish(it.task, "cancelled: app left foreground") }
         if (visible) refresh()
     }
     fun dismissPanel() { output.value = null }
@@ -152,6 +152,11 @@ class CompanionManager(private val context: Context) {
             override fun onServiceConnected(name: ComponentName, binder: IBinder) {
                 val session = sessions[task] ?: return
                 if (!valid(task)) { finish(task, "session expired"); return }
+                session.verification = scope.launch {
+                val verified = withContext(Dispatchers.IO) { runCatching { discover().firstOrNull { it.key == key } }.getOrNull() }
+                if (!valid(task) || verified?.identity != entry.identity) {
+                    finish(task, "package changed"); refresh(); return@launch
+                }
                 val worker = IExtensionWorker.Stub.asInterface(binder)
                 session.worker = worker
                 val completed = java.util.concurrent.atomic.AtomicBoolean(false)
@@ -177,6 +182,7 @@ class CompanionManager(private val context: Context) {
                         finish(task, outcome)
                     } }
                 }) } catch (_: Exception) { finish(task, "worker connection failed") }
+                }
             }
             override fun onServiceDisconnected(name: ComponentName) { finish(task, "worker stopped") }
             override fun onBindingDied(name: ComponentName) { finish(task, "binding died") }
@@ -184,12 +190,18 @@ class CompanionManager(private val context: Context) {
         }
         val session = Session(entry, connection)
         sessions[task] = session; live.value = sessions.values.map { it.entry.key }.toSet()
+        session.deadline = scope.launch { delay(30_000); if (sessions.containsKey(task)) finish(task, "deadline exceeded") }
+        session.verification = scope.launch {
+        val verified = withContext(Dispatchers.IO) { runCatching { discover().firstOrNull { it.key == key } }.getOrNull() }
+        if (!valid(task) || verified?.identity != entry.identity) {
+            finish(task, "package changed"); refresh(); return@launch
+        }
         try {
             session.bound = context.bindService(Intent(ExtensionWorkerService.DISCOVERY_ACTION).setComponent(entry.component), connection, Context.BIND_AUTO_CREATE)
-            if (!session.bound) { finish(task, "worker unavailable"); return }
+            if (!session.bound) { finish(task, "worker unavailable"); return@launch }
             record(entry, "started")
-            session.deadline = scope.launch { delay(30_000); if (sessions.containsKey(task)) finish(task, "deadline exceeded") }
         } catch (_: Exception) { finish(task, "binding rejected") }
+        }
     }
     private fun valid(task: String): Boolean {
         val session = sessions[task] ?: return false
@@ -198,7 +210,7 @@ class CompanionManager(private val context: Context) {
     private fun finish(task: String, reason: String) {
         val session = sessions.remove(task) ?: return
         session.cancelled.set(true)
-        policy.finish(task); session.deadline?.cancel(); session.networkJob?.cancel()
+        policy.finish(task); session.deadline?.cancel(); session.networkJob?.cancel(); session.verification?.cancel()
         calls.entries.filter { it.value == task }.forEach { it.key.cancel() }
         runCatching { session.worker?.cancel(task) }
         if (session.bound) runCatching { context.unbindService(session.connection) }
@@ -222,7 +234,7 @@ class CompanionManager(private val context: Context) {
         private val admission = ExtensionRequestGate(SystemClock::elapsedRealtime)
         override fun request(taskId: String, requestId: String, operation: String, payload: String, result: IExtensionResult) {
             // Malformed/excess requests are dropped before they can flood the host looper.
-            if (taskId != task || operation != "network.fetch" || requestId.length !in 1..80 || payload.length > 4096 || payload.toByteArray().size > 4096 || !admission.acquire()) return
+            if (taskId != task || operation.length !in 1..80 || requestId.length !in 1..80 || payload.length > 4096 || payload.toByteArray().size > 4096 || !admission.acquire()) return
             handler.post {
             fun reply(ok: Boolean, value: JSONObject) { runCatching { result.complete(requestId, ok, value.toString()) }; admission.release() }
             val session = sessions[task]

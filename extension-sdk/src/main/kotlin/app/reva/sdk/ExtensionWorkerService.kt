@@ -31,7 +31,7 @@ abstract class ExtensionWorkerService : Service() {
             return response
         }
         fun request(id: String, operation: String, payload: JSONObject, result: (Boolean, JSONObject) -> Unit) {
-            require(id.length in 1..80 && payload.toString().toByteArray().size <= 16_384)
+            require(id.length in 1..80 && operation.length in 1..80 && payload.toString().toByteArray().size <= 4096)
             bridge.request(task, id, operation, payload.toString(), object : IExtensionResult.Stub() {
                 override fun complete(requestId: String, success: Boolean, payload: String) {
                     if (payload.toByteArray().size <= 262_144) result(success, JSONObject(payload))
