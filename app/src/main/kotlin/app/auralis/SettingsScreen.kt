@@ -1,6 +1,7 @@
 package app.auralis
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import app.auralis.model.*
@@ -24,14 +26,25 @@ internal fun SettingsScreen(state: PlayerScreenState, model: PlayerViewModel, ho
     addFolder: () -> Unit, addFiles: () -> Unit, enableUpdates: () -> Unit, changeFolder: (LibrarySource) -> Unit, openExtensions: () -> Unit) {
     var remove by remember { mutableStateOf<LibrarySource?>(null) }
     var clear by remember { mutableStateOf(false) }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 22.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
-            Text("Extensions & internet", style = MaterialTheme.typography.titleLarge)
-            Text("Manage providers, custom skins, web players and server-hosted parties.", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodyMedium)
-            Button(openExtensions, Modifier.fillMaxWidth().padding(top = 12.dp)) { Icon(Icons.Rounded.Extension, null); Spacer(Modifier.width(8.dp)); Text("Open extension manager") }
+            Surface(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainer) {
+                Row(Modifier.clickable(onClick = openExtensions).padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary.copy(alpha = .15f)) {
+                        Icon(Icons.Rounded.Extension, null, Modifier.padding(13.dp), tint = MaterialTheme.colorScheme.primary)
+                    }
+                    Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+                        Text("Extensions & services", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text("Providers, skins and developer dashboards", Modifier.padding(top = 3.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Icon(Icons.Rounded.ChevronRight, "Open extension manager", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
-        item { Text("Your music library", style = MaterialTheme.typography.titleLarge)
-            Text("Saved folders update in the background. Changes here do not delete your audio files.", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        item { Column {
+            Text("Your music", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text("Manage the folders and files ReVa scans on this device.", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } }
         items(home.sources, key = { it.uri }) { source ->
             Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer) {
                 Column(Modifier.fillMaxWidth().padding(16.dp)) {
@@ -50,39 +63,58 @@ internal fun SettingsScreen(state: PlayerScreenState, model: PlayerViewModel, ho
             }
         }
         item {
-            Button(onClick = addFolder, enabled = !home.index.busy, modifier = Modifier.fillMaxWidth(), shape = CircleShape) {
-                Icon(Icons.Rounded.CreateNewFolder, null); Spacer(Modifier.width(8.dp)); Text("Add music folder")
+            Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainer) {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Button(onClick = addFolder, enabled = !home.index.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = CircleShape) {
+                        Icon(Icons.Rounded.CreateNewFolder, null); Spacer(Modifier.width(8.dp)); Text("Add music folder")
+                    }
+                    Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                        TextButton(onClick = addFiles) { Text("Add audio files") }
+                        TextButton(onClick = library::refresh, enabled = !home.index.busy) { Text("Refresh") }
+                    }
+                    if (!home.autoUpdates) OutlinedButton(onClick = enableUpdates, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), shape = CircleShape) { Text("Enable new-download detection") }
+                    else Text("New-download detection enabled", Modifier.padding(horizontal = 8.dp, vertical = 6.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                }
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(onClick = addFiles) { Text("Add audio files") }
-                TextButton(onClick = library::refresh, enabled = !home.index.busy) { Text("Refresh library") }
-            }
-            if (!home.autoUpdates) OutlinedButton(onClick = enableUpdates, modifier = Modifier.fillMaxWidth()) { Text("Enable new-download detection") }
-            else Text("New-download detection enabled", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
         }
-        item { HorizontalDivider(); Text("Playback & transitions", Modifier.padding(top = 20.dp), style = MaterialTheme.typography.titleLarge) }
+        item { Text("Playback", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
         item {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) { Text("DJ blend", style = MaterialTheme.typography.titleMedium)
-                    Text("A softer entrance and exit between songs.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                Switch(state.djMode, model::dj, enabled = state.connected)
-            }
-            Text("Crossfade · ${if(state.crossfadeSeconds == 0) "Off" else "${state.crossfadeSeconds} seconds"}", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.titleMedium)
-            var fade by remember(state.crossfadeSeconds) { mutableFloatStateOf(state.crossfadeSeconds.toFloat()) }
-            Slider(fade, { fade = it }, onValueChangeFinished = { model.crossfade(fade.toInt()) }, valueRange = 0f..12f, steps = 11, enabled = state.connected)
-            Text("Try 6–8 seconds. Repeat-one skips crossfade. DJ blend is a volume transition; it does not match beats or change tempo.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        item { HorizontalDivider(); Text("Appearance", Modifier.padding(top = 20.dp), style = MaterialTheme.typography.titleLarge)
-            Row(Modifier.horizontalScroll(rememberScrollState()).padding(vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                accents.forEachIndexed { index, color -> IconButton(onClick = { model.accent(index) }, modifier = Modifier.background(color, CircleShape)) {
-                    Icon(if(state.accent == index) Icons.Rounded.Check else Icons.Rounded.Palette, "Accent ${index+1}", tint = Color.Black)
-                } }
+            Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainer) {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) { Text("DJ blend", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Text("A smoother volume transition between songs.", Modifier.padding(top = 3.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        Switch(state.djMode, model::dj, enabled = state.connected)
+                    }
+                    Text("Crossfade · ${if(state.crossfadeSeconds == 0) "Off" else "${state.crossfadeSeconds} seconds"}", Modifier.padding(top = 14.dp), style = MaterialTheme.typography.titleSmall)
+                    var fade by remember(state.crossfadeSeconds) { mutableFloatStateOf(state.crossfadeSeconds.toFloat()) }
+                    Slider(fade, { fade = it }, onValueChangeFinished = { model.crossfade(fade.toInt()) }, valueRange = 0f..12f, steps = 11, enabled = state.connected)
+                    Text("Repeat-one skips crossfade. DJ blend adjusts volume; it does not match beats or tempo.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
-        item { HorizontalDivider(); Text("Listening history", Modifier.padding(top = 20.dp), style = MaterialTheme.typography.titleLarge)
-            Text("History records songs when playback starts. Favorites stay saved until you remove them.", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            TextButton(onClick = { clear = true }) { Text("Clear listening history") }
-            Text("ReVa · Extension SDK v1", Modifier.padding(top = 18.dp, bottom = 24.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        item {
+            Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text("Appearance", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("Choose ReVa’s accent color", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        accents.forEachIndexed { index, color -> IconButton(onClick = { model.accent(index) }, modifier = Modifier.size(48.dp).background(color, CircleShape)) {
+                            Icon(if(state.accent == index) Icons.Rounded.Check else Icons.Rounded.Palette, "Accent ${index+1}", tint = Color.Black)
+                        } }
+                    }
+                }
+            }
+        }
+        item {
+            Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainer) {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text("Listening history", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("History records songs when playback starts. Favorites stay saved until you remove them.", Modifier.padding(top = 5.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    TextButton(onClick = { clear = true }, modifier = Modifier.padding(top = 4.dp)) { Text("Clear listening history") }
+                }
+            }
+            Text("ReVa · Extension SDK v1", Modifier.padding(top = 12.dp, bottom = 24.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
     remove?.let { source -> AlertDialog(onDismissRequest = { remove = null }, title = { Text("Remove ${source.label}?") }, text = { Text("Remove this source from ReVa. Audio files stay on your device; songs covered by another saved folder stay in the library.") },
