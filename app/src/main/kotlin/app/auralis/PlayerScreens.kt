@@ -48,7 +48,7 @@ internal fun MiniPlayer(state: PlayerScreenState, model: PlayerViewModel, open: 
     val item = state.queue.getOrNull(state.index) ?: return
     val metadata = item.mediaMetadata
     Surface(Modifier.padding(horizontal = 12.dp, vertical = 5.dp).fillMaxWidth(), shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer, shadowElevation = 12.dp, border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = .06f))) {
+        color = MaterialTheme.colorScheme.surfaceContainerHigh, shadowElevation = 8.dp, border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .35f))) {
         Column {
             Row(Modifier.fillMaxWidth().clickable(onClick = open).padding(start = 10.dp, top = 8.dp, bottom = 8.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 TrackCover(metadata.artworkUri, metadata.title.toString(), Modifier.size(46.dp), RoundedCornerShape(9.dp))
@@ -57,14 +57,14 @@ internal fun MiniPlayer(state: PlayerScreenState, model: PlayerViewModel, open: 
                     Text(metadata.artist?.toString() ?: "Unknown artist", Modifier.padding(top = 3.dp), maxLines = 1, overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                IconButton(onClick = model::togglePlayback, enabled = state.connected) {
+                IconButton(onClick = model::togglePlayback, enabled = state.connected, modifier = Modifier.size(48.dp).background(MaterialTheme.colorScheme.primary, CircleShape)) {
                     if (state.buffering) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onSurface)
-                    else Icon(if (state.playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow, if (state.playing) "Pause" else "Play", Modifier.size(28.dp), tint = MaterialTheme.colorScheme.onSurface)
+                    else Icon(if (state.playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow, if (state.playing) "Pause" else "Play", Modifier.size(28.dp), tint = MaterialTheme.colorScheme.onPrimary)
                 }
                 IconButton(onClick = model::next, enabled = state.connected && state.canNext) { Icon(Icons.Rounded.SkipNext, "Next track", Modifier.size(26.dp)) }
             }
             LinearProgressIndicator(progress = { if (state.durationMs > 0) (state.positionMs.toFloat() / state.durationMs).coerceIn(0f, 1f) else 0f },
-                modifier = Modifier.fillMaxWidth().height(2.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f), trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .06f))
+                modifier = Modifier.fillMaxWidth().height(2.dp), color = MaterialTheme.colorScheme.primary, trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .08f))
         }
     }
 }
@@ -81,9 +81,9 @@ internal fun NowPlaying(state: PlayerScreenState, model: PlayerViewModel, loved:
             Text(metadata.albumTitle?.toString()?.takeUnless { it == "Unknown album" } ?: "Your collection",
                 style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(12.dp))
-            TrackCover(metadata.artworkUri, metadata.title?.toString().orEmpty(), Modifier.size(cover).shadow(28.dp, RoundedCornerShape(16.dp)), RoundedCornerShape(16.dp), animate = state.playing)
+            TrackCover(metadata.artworkUri, metadata.title?.toString().orEmpty(), Modifier.size(cover).shadow(24.dp, RoundedCornerShape(22.dp)), RoundedCornerShape(22.dp), animate = state.playing)
             Column(Modifier.widthIn(max = 440.dp).fillMaxWidth().padding(top = 20.dp)) {
-                Text(metadata.title?.toString() ?: "Untitled audio", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold,
+            Text(metadata.title?.toString() ?: "Untitled audio", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold,
                     maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
                 Text(metadata.artist?.toString() ?: "Unknown artist", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -109,7 +109,7 @@ private fun PlayerSeekBar(state: PlayerScreenState, model: PlayerViewModel) {
     val duration = state.durationMs.coerceAtLeast(1).toFloat()
     val interaction = remember { MutableInteractionSource() }
     val style = LocalSkin.current.seekBarStyle
-    val colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.onSurface, activeTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .85f), inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .18f))
+    val colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary, inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
     Slider(value = if (state.durationMs > 0) scrub ?: state.positionMs.toFloat().coerceIn(0f, duration) else 0f, onValueChange = { scrub = it },
         onValueChangeFinished = { scrub?.let { model.seek(it.toLong()) }; scrub = null },
         valueRange = 0f..duration, enabled = state.seekable && state.durationMs > 0,
@@ -118,7 +118,7 @@ private fun PlayerSeekBar(state: PlayerScreenState, model: PlayerViewModel) {
         track = { slider ->
             if (style == "classic") SliderDefaults.Track(slider, Modifier.height(4.dp), enabled = state.seekable && state.durationMs > 0, colors = colors)
             else {
-                val active = MaterialTheme.colorScheme.onSurface.copy(alpha = if (state.seekable) .9f else .4f)
+                val active = MaterialTheme.colorScheme.primary.copy(alpha = if (state.seekable) 1f else .45f)
                 val inactive = MaterialTheme.colorScheme.onSurface.copy(alpha = .18f)
                 val progress = ((slider.value - slider.valueRange.start) / (slider.valueRange.endInclusive - slider.valueRange.start).coerceAtLeast(1f)).coerceIn(0f, 1f)
                 Canvas(Modifier.fillMaxWidth().height(20.dp)) {
@@ -164,9 +164,9 @@ private fun PlayerTransport(state: PlayerScreenState, model: PlayerViewModel, co
             Icon(Icons.Rounded.SkipPrevious, "Previous track", Modifier.size(if (compact) 28.dp else 34.dp), tint = if (state.canPrevious) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = .25f))
         }
         IconButton(onClick = model::togglePlayback, enabled = state.connected,
-            modifier = Modifier.size(if (compact) 60.dp else 72.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = .08f), CircleShape)) {
-            if (state.buffering) CircularProgressIndicator(Modifier.size(28.dp), color = MaterialTheme.colorScheme.onSurface, strokeWidth = 2.dp)
-            else Icon(if (state.playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow, if (state.playing) "Pause" else "Play", Modifier.size(if (compact) 36.dp else 48.dp), tint = MaterialTheme.colorScheme.onSurface)
+            modifier = Modifier.size(if (compact) 60.dp else 72.dp).background(MaterialTheme.colorScheme.primary, CircleShape)) {
+            if (state.buffering) CircularProgressIndicator(Modifier.size(28.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+            else Icon(if (state.playing) Icons.Rounded.Pause else Icons.Rounded.PlayArrow, if (state.playing) "Pause" else "Play", Modifier.size(if (compact) 36.dp else 48.dp), tint = MaterialTheme.colorScheme.onPrimary)
         }
         IconButton(onClick = model::next, enabled = state.connected && state.canNext, modifier = Modifier.size(48.dp)) {
             Icon(Icons.Rounded.SkipNext, "Next track", Modifier.size(if (compact) 28.dp else 34.dp), tint = if (state.canNext) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = .25f))

@@ -106,8 +106,8 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
     ArtworkAtmosphere(if (immersive) item?.mediaMetadata?.artworkUri else null, Modifier.fillMaxSize()) {
         Scaffold(containerColor = if (immersive) Color.Transparent else MaterialTheme.colorScheme.background,
             topBar = {
-                if (extensionPage) TopAppBar(title = { Text("Extensions & internet") }, navigationIcon = { IconButton(onClick = { extensionPage = false; webId = null }) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back to settings") } })
-                else if (settings) TopAppBar(title = { Text("Settings") }, navigationIcon = { IconButton(onClick = { settings = false }) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back to music") } })
+                if (extensionPage) TopAppBar(title = { Text("Extensions", fontWeight = FontWeight.SemiBold) }, navigationIcon = { IconButton(onClick = { extensionPage = false; webId = null }) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back to settings") } }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background))
+                else if (settings) TopAppBar(title = { Text("Settings", fontWeight = FontWeight.SemiBold) }, navigationIcon = { IconButton(onClick = { settings = false }) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back to music") } }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background))
                 else if (immersive) CenterAlignedTopAppBar(
                     title = { Text(if (tab == 3) "LYRICS" else "NOW PLAYING", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .72f)) },
                     navigationIcon = { IconButton(onClick = { tab = 0; library.browse(app.auralis.model.LibraryBrowse.SONGS) }) { Icon(Icons.Rounded.KeyboardArrowDown, "Collapse player", Modifier.size(30.dp)) } },
@@ -141,11 +141,11 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
                     }
                 } else Column {
                     if (item != null) MiniPlayer(state, model, open = { tab = 4 })
-                    NavigationBar(containerColor = MaterialTheme.colorScheme.background, tonalElevation = 0.dp) {
+                    NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 0.dp) {
                         listOf("Home", "Favorites", "Queue", "Lyrics").forEachIndexed { index, label ->
                             val icon = when (index) { 0 -> Icons.Rounded.Home; 1 -> Icons.Rounded.Favorite; 2 -> Icons.AutoMirrored.Rounded.PlaylistPlay; else -> Icons.Rounded.Lyrics }
                             NavigationBarItem(selected = tab == index, onClick = { tab = index; if(index == 0) library.browse(app.auralis.model.LibraryBrowse.SONGS) else if(index == 1) library.browse(app.auralis.model.LibraryBrowse.FAVORITES) }, icon = { Icon(icon, null, Modifier.size(23.dp)) }, label = { Text(label) },
-                                colors = NavigationBarItemDefaults.colors(indicatorColor = Color.Transparent, selectedIconColor = MaterialTheme.colorScheme.primary,
+                                colors = NavigationBarItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = .15f), selectedIconColor = MaterialTheme.colorScheme.primary,
                                     selectedTextColor = MaterialTheme.colorScheme.primary, unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant))
                         }
                     }

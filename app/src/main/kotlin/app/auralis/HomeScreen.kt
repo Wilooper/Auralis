@@ -2,7 +2,6 @@ package app.auralis
 
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -40,7 +39,7 @@ internal fun TrackCover(uri: Uri?, title: String, modifier: Modifier = Modifier,
     val context = LocalContext.current
     val skin = LocalSkin.current
     val primary = MaterialTheme.colorScheme.primary
-    val colors = remember(title, primary) { listOf(primary.copy(alpha = .38f), Color(0xFF282332), Color(0xFF131219)) }
+    val colors = remember(title, primary) { listOf(primary.copy(alpha = .38f), Color(0xFF252C29), Color(0xFF131715)) }
     val motionAllowed = animate && skin.coverMotion != "none" && android.animation.ValueAnimator.areAnimatorsEnabled()
     val scale = if(motionAllowed && skin.coverMotion == "pulse") {
         rememberInfiniteTransition(label = "cover-pulse").animateFloat(1f, 1.035f,
@@ -71,26 +70,28 @@ internal fun HomeScreen(home: HomeState, library: LibraryViewModel, canPlay: Boo
     val featured = home.played.firstOrNull() ?: home.recent.firstOrNull()
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         item(key = "welcome") {
-            Column(Modifier.padding(horizontal = 22.dp, vertical = 12.dp)) {
-                Text(if (favoritesOnly) "THE ONES YOU LOVE" else "LISTEN YOUR WAY", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                Text(if (favoritesOnly) "Favorites" else "Made of your music.", Modifier.padding(top = 8.dp), style = MaterialTheme.typography.headlineLarge)
-                Text(if (home.loading) "Opening your collection…" else "${home.total} songs. Endless possibilities.",
-                    Modifier.padding(top = 8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-                OutlinedTextField(home.query, library::search, Modifier.fillMaxWidth().padding(top = 22.dp),
-                    placeholder = { Text("Search songs, artists, albums") }, singleLine = true,
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+                Text(if (favoritesOnly) "YOUR PERSONAL MIX" else when (java.time.LocalTime.now().hour) {
+                    in 5..11 -> "GOOD MORNING"; in 12..16 -> "GOOD AFTERNOON"; in 17..21 -> "GOOD EVENING"; else -> "GOOD TO HAVE YOU BACK"
+                }, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                Text(if (favoritesOnly) "Your favorites" else "Your music, in one place.", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text(if (home.loading) "Getting your library ready" else "${home.total} ${if (home.total == 1) "song" else "songs"} in your library",
+                    Modifier.padding(top = 5.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                OutlinedTextField(home.query, library::search, Modifier.fillMaxWidth().padding(top = 18.dp),
+                    placeholder = { Text("What do you want to play?") }, singleLine = true,
                     leadingIcon = { Icon(Icons.Rounded.Search, null, Modifier.size(22.dp)) },
                     trailingIcon = { if (home.query.isNotEmpty()) IconButton(onClick = { library.search("") }) { Icon(Icons.Rounded.Close, "Clear search") } },
-                    shape = RoundedCornerShape(16.dp), colors = OutlinedTextFieldDefaults.colors(
+                    shape = CircleShape, colors = OutlinedTextFieldDefaults.colors(
                         unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        unfocusedBorderColor = Color.Transparent, focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = .55f)))
+                        unfocusedBorderColor = Color.Transparent, focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = .7f)))
                 if (!favoritesOnly) Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     LibraryBrowse.entries.filter { it != LibraryBrowse.FAVORITES }.forEach { browse ->
                         val selected = home.browse == browse
                         FilterChip(selected, { library.browse(browse) }, label = { Text(if (browse == LibraryBrowse.RECENT) "Recently added" else browse.name.lowercase().replaceFirstChar { it.titlecase() }) },
                             shape = CircleShape, border = null, colors = FilterChipDefaults.filterChipColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                selectedContainerColor = Color(0xFFF1EEF0), selectedLabelColor = Color(0xFF17151B)))
+                                selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
                     }
                 }
             }
@@ -108,27 +109,43 @@ internal fun HomeScreen(home: HomeState, library: LibraryViewModel, canPlay: Boo
             }
         }
         if (discover && featured != null) item(key = "featured") {
-            Surface(Modifier.padding(horizontal = 22.dp, vertical = 10.dp).fillMaxWidth(), shape = RoundedCornerShape(22.dp), color = Color(0xFF27212D)) {
-                Row(Modifier.background(Brush.linearGradient(listOf(Color(0xFF493044), Color(0xFF211D28)))).padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(Modifier.padding(horizontal = 20.dp, vertical = 8.dp).fillMaxWidth(), shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                Row(Modifier.background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary.copy(alpha = .18f), MaterialTheme.colorScheme.surfaceContainerHigh))).padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f).padding(end = 14.dp)) {
-                        Text(if (home.played.isEmpty()) "FRESH IN YOUR COLLECTION" else "BACK IN ROTATION", style = MaterialTheme.typography.labelSmall, color = Color(0xFFE2BBCB))
-                        Text(featured.title, Modifier.padding(top = 12.dp), style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        Text(featured.artist, Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = Color(0xFFCEC0CC), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(if (home.played.isEmpty()) "PICK UP SOMETHING NEW" else "PICK UP WHERE YOU LEFT OFF", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                        Text(featured.title, Modifier.padding(top = 10.dp), style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(featured.artist, Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         FilledTonalButton(onClick = { onPlay(if (home.played.isEmpty()) home.recent else home.played, featured.id) },
                             enabled = canPlay, modifier = Modifier.padding(top = 12.dp).heightIn(min = 48.dp), shape = CircleShape,
-                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color.White, contentColor = Color(0xFF211620))) {
-                            Icon(Icons.Rounded.PlayArrow, null, Modifier.size(20.dp)); Spacer(Modifier.width(4.dp)); Text("Play")
+                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
+                            Icon(Icons.Rounded.PlayArrow, null, Modifier.size(20.dp)); Spacer(Modifier.width(4.dp)); Text("Play now")
                         }
                     }
-                    TrackCover(featured.artworkUri(context), featured.title, Modifier.size(108.dp), RoundedCornerShape(14.dp))
+                    TrackCover(featured.artworkUri(context), featured.title, Modifier.size(112.dp), RoundedCornerShape(16.dp))
                 }
             }
         }
+        if (discover && home.played.isNotEmpty()) item(key = "quick-access-title") {
+            Text("Recently played", Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 10.dp), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        }
+        if (discover && home.played.isNotEmpty()) items(home.played.take(4).chunked(2), key = { "quick:${it.first().id}" }) { pair ->
+            Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                pair.forEach { track ->
+                    Surface(Modifier.weight(1f).heightIn(min = 64.dp).clickable(enabled = canPlay) { onPlay(home.played, track.id) }, shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TrackCover(track.artworkUri(context), track.title, Modifier.size(60.dp), RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                            Text(track.title, Modifier.weight(1f).padding(horizontal = 10.dp), style = MaterialTheme.typography.labelLarge, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                }
+                if (pair.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
         if (discover && home.played.isNotEmpty()) item(key = "played") {
-            CoverShelf("On repeat lately", "Pick up where you left off", home.played, canPlay, onPlay)
+            CoverShelf("Made for another listen", "From your listening history", home.played, canPlay, onPlay)
         }
         if (discover && home.recent.isNotEmpty()) item(key = "recent") {
-            CoverShelf("New to your world", "Recently added", home.recent, canPlay, onPlay)
+            CoverShelf("Freshly added", "New in your library", home.recent, canPlay, onPlay)
         }
         if (openGroup) item(key = "breadcrumb") {
             Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -140,10 +157,10 @@ internal fun HomeScreen(home: HomeState, library: LibraryViewModel, canPlay: Boo
             Row(Modifier.fillMaxWidth().padding(start = 22.dp, end = 12.dp, top = 18.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(if (home.query.isNotBlank()) "Search results" else if (openGroup) "Tracks" else when (home.browse) {
-                        LibraryBrowse.SONGS -> "Your collection"; LibraryBrowse.ARTISTS -> "The artists"; LibraryBrowse.ALBUMS -> "Album library"
-                        LibraryBrowse.HISTORY -> "Listening history"; LibraryBrowse.RECENT -> "Recently added"; LibraryBrowse.FAVORITES -> "Loved songs"
-                    }, style = MaterialTheme.typography.titleLarge)
-                    if (discover) Text("Every song, in one place", Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                        LibraryBrowse.SONGS -> "All songs"; LibraryBrowse.ARTISTS -> "Artists"; LibraryBrowse.ALBUMS -> "Albums"
+                        LibraryBrowse.HISTORY -> "Recently played"; LibraryBrowse.RECENT -> "Recently added"; LibraryBrowse.FAVORITES -> "Liked songs"
+                    }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    if (discover) Text("Browse your whole collection", Modifier.padding(top = 4.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                 }
 
             }
@@ -193,14 +210,14 @@ internal fun HomeScreen(home: HomeState, library: LibraryViewModel, canPlay: Boo
 @Composable
 private fun CoverShelf(title: String, subtitle: String, tracks: List<LibraryTrack>, enabled: Boolean, play: (List<LibraryTrack>, String) -> Unit) {
     val context = LocalContext.current
-    Column(Modifier.padding(top = 22.dp)) {
-        Text(title, Modifier.padding(horizontal = 22.dp), style = MaterialTheme.typography.titleLarge)
-        Text(subtitle, Modifier.padding(start = 22.dp, top = 4.dp, bottom = 16.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        LazyRow(contentPadding = PaddingValues(horizontal = 22.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.padding(top = 20.dp)) {
+        Text(title, Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(subtitle, Modifier.padding(start = 20.dp, top = 4.dp, bottom = 14.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             items(tracks, key = { it.id }) { track ->
-                Column(Modifier.width(158.dp).clickable(enabled = enabled) { play(tracks, track.id) }) {
-                    TrackCover(track.artworkUri(context), track.title, Modifier.size(158.dp))
-                    Text(track.title, Modifier.padding(top = 10.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
+                Column(Modifier.width(148.dp).clickable(enabled = enabled) { play(tracks, track.id) }) {
+                    TrackCover(track.artworkUri(context), track.title, Modifier.size(148.dp), RoundedCornerShape(14.dp))
+                    Text(track.title, Modifier.padding(top = 9.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                     Text(track.artist, Modifier.padding(top = 3.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -212,8 +229,8 @@ private fun CoverShelf(title: String, subtitle: String, tracks: List<LibraryTrac
 private fun HomeTrackRow(track: LibraryTrack, enabled: Boolean, loved: Boolean, favorite: () -> Unit, play: () -> Unit) {
     val context = LocalContext.current
     val skin = LocalSkin.current
-    Row(Modifier.fillMaxWidth().heightIn(min = skin.rowHeight.dp).clickable(enabled = enabled, onClick = play).padding(horizontal = 22.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-        TrackCover(track.artworkUri(context), track.title, Modifier.size(skin.artworkSize.dp), RoundedCornerShape(skin.cornerRadius.dp))
+    Row(Modifier.fillMaxWidth().heightIn(min = maxOf(68, skin.rowHeight).dp).clickable(enabled = enabled, onClick = play).padding(horizontal = 20.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+        TrackCover(track.artworkUri(context), track.title, Modifier.size(skin.artworkSize.dp), RoundedCornerShape(maxOf(10, skin.cornerRadius - 4).dp))
         Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
             Text(track.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
             Text(track.artist, Modifier.padding(top = 4.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

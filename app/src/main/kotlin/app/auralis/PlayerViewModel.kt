@@ -41,7 +41,7 @@ data class PlayerScreenState(
     val repeat: Int = Player.REPEAT_MODE_OFF,
     val canNext: Boolean = false,
     val canPrevious: Boolean = false,
-    val accent: Int = 4,
+    val accent: Int = 0,
     val lyrics: Lyrics? = null,
     val lyricsLoading: Boolean = false,
     val lyricsMessage: String? = null,
@@ -53,7 +53,7 @@ data class PlayerScreenState(
 @UnstableApi
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences = application.getSharedPreferences("appearance", Application.MODE_PRIVATE)
-    private val mutableState = MutableStateFlow(PlayerScreenState(djMode = application.getSharedPreferences("playback", Application.MODE_PRIVATE).getBoolean("dj", false), accent = preferences.getInt("accent", 4),
+    private val mutableState = MutableStateFlow(PlayerScreenState(djMode = application.getSharedPreferences("playback", Application.MODE_PRIVATE).getBoolean("dj", false), accent = preferences.getInt("accent", 0),
         crossfadeSeconds = (application.getSharedPreferences("playback", Application.MODE_PRIVATE).getLong("crossfade", 0) / 1000).toInt()))
     val state = mutableState.asStateFlow()
     private var controller: MediaController? = null
