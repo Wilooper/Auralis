@@ -14,6 +14,7 @@ import android.os.SystemClock
 import app.auralis.model.ExtensionTaskPolicy
 import app.auralis.model.ExtensionRequestGate
 import app.reva.sdk.ExtensionWorkerService
+import app.reva.sdk.ExtensionProtocol
 import app.reva.sdk.IExtensionHost
 import app.reva.sdk.IExtensionResult
 import app.reva.sdk.IExtensionWorker
@@ -22,6 +23,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.Call
 import okhttp3.Dns
 import okhttp3.OkHttpClient
@@ -62,6 +65,8 @@ class CompanionManager(private val context: Context) {
     private val calls = ConcurrentHashMap<Call, String>()
     private val networkSlots = Semaphore(2)
     private var refreshEpoch = 0L
+    private var refreshJob: Job? = null
+    private val discoveryLock = Mutex()
     private val client = OkHttpClient.Builder().followRedirects(false).followSslRedirects(false)
         .connectTimeout(8, TimeUnit.SECONDS).readTimeout(8, TimeUnit.SECONDS).callTimeout(15, TimeUnit.SECONDS)
         .dns(object : Dns {
@@ -74,8 +79,10 @@ class CompanionManager(private val context: Context) {
         var deadline: Job? = null, var networkJob: Job? = null, var verification: Job? = null,
         val cancelled: java.util.concurrent.atomic.AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean(false))
 
-    fun refresh() { val epoch = ++refreshEpoch; scope.launch {
-        val rows = withContext(Dispatchers.IO) { runCatching { discover() }.getOrDefault(emptyList()) }
+    fun refresh() { val epoch = ++refreshEpoch; refreshJob?.cancel(); refreshJob = scope.launch {
+        val rows = try { withContext(Dispatchers.IO) { discover() } }
+            catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { emptyList() }
         if (epoch != refreshEpoch) return@launch
         sessions.toMap().forEach { (task, session) ->
             if (rows.none { it.key == session.entry.key && it.identity == session.entry.identity }) finish(task, "package changed")
@@ -85,11 +92,22 @@ class CompanionManager(private val context: Context) {
         failures.keys.retainAll(rows.map { it.key }.toSet())
     } }
     @Suppress("DEPRECATION")
-    private fun discover(): List<CompanionEntry> {
+    private suspend fun discover(): List<CompanionEntry> = discoveryLock.withLock {
         val pm = context.packageManager
         val services = pm.queryIntentServices(Intent(ExtensionWorkerService.DISCOVERY_ACTION), PackageManager.GET_META_DATA)
-        return services.sortedBy { it.serviceInfo.packageName }.take(32).mapNotNull { resolved -> runCatching {
-            val service = resolved.serviceInfo
+        services.sortedBy { it.serviceInfo.packageName }.take(32).mapNotNull { resolved ->
+            currentCoroutineContext().ensureActive()
+            runCatching { readEntry(resolved.serviceInfo) }.getOrNull()
+        }
+    }
+    @Suppress("DEPRECATION")
+    private suspend fun verify(component: ComponentName): CompanionEntry? = discoveryLock.withLock {
+        currentCoroutineContext().ensureActive()
+        runCatching { readEntry(context.packageManager.getServiceInfo(component, PackageManager.GET_META_DATA)) }.getOrNull()
+    }
+    @Suppress("DEPRECATION")
+    private fun readEntry(service: ServiceInfo): CompanionEntry {
+            val pm = context.packageManager
             require(service.exported && service.enabled && service.applicationInfo.enabled)
             require(service.flags and ServiceInfo.FLAG_ISOLATED_PROCESS != 0) { "Worker must be isolated" }
             require(service.permission == null) { "Worker requires an unsupported Android binding permission" }
@@ -112,9 +130,8 @@ class CompanionManager(private val context: Context) {
             val grants = if (valid) saved.optJSONArray("grants")?.let { array ->
                 (0 until array.length()).map { array.getString(it) }.toSet().intersect(descriptor.capabilities)
             }.orEmpty() else emptySet()
-            CompanionEntry(component, descriptor, publisher, identity, grants,
+            return CompanionEntry(component, descriptor, publisher, identity, grants,
                 valid && "compute.background" in grants && saved.optBoolean("background"))
-        }.getOrNull() }
     }
     fun grant(key: String, grants: Set<String>, background: Boolean = false) {
         check(Looper.myLooper() == Looper.getMainLooper())
@@ -130,7 +147,7 @@ class CompanionManager(private val context: Context) {
         record(entry, if (grants.isEmpty()) "disabled" else "permissions updated")
     }
     fun visibility(visible: Boolean) {
-        policy.visibility(visible).forEach { finish(it.task, "cancelled: app left foreground") }
+        policy.visibility(visible).forEach { finish(it.task, if (SystemClock.elapsedRealtime() >= it.deadline) "deadline exceeded" else "cancelled: app left foreground") }
         if (visible) refresh()
     }
     fun dismissPanel() { output.value = null }
@@ -142,6 +159,7 @@ class CompanionManager(private val context: Context) {
     fun cancelAll() { sessions.keys.toList().forEach { finish(it, "cancelled by user") } }
     fun invoke(key: String, action: CompanionAction, input: JSONObject = JSONObject()) {
         check(Looper.myLooper() == Looper.getMainLooper())
+        policy.expire().forEach { finish(it.task, "deadline exceeded") }
         val entry = entries.value.firstOrNull { it.key == key && it.enabled } ?: return
         require(action in entry.descriptor.actions && input.toString().toByteArray().size <= 16_384)
         val task = UUID.randomUUID().toString()
@@ -153,7 +171,7 @@ class CompanionManager(private val context: Context) {
                 val session = sessions[task] ?: return
                 if (!valid(task)) { finish(task, "session expired"); return }
                 session.verification = scope.launch {
-                val verified = withContext(Dispatchers.IO) { runCatching { discover().firstOrNull { it.key == key } }.getOrNull() }
+                val verified = withContext(Dispatchers.IO) { verify(entry.component) }
                 if (!valid(task) || verified?.identity != entry.identity) {
                     finish(task, "package changed"); refresh(); return@launch
                 }
@@ -169,11 +187,7 @@ class CompanionManager(private val context: Context) {
                         var outcome = if (success) "completed" else "action failed"
                         if (success) {
                             val value = runCatching {
-                                checkJsonDepth(safePayload)
-                                JSONObject(safePayload).also {
-                                    require(it.keys().asSequence().all { field -> field in setOf("title", "text") })
-                                    require(it.getString("title").length in 1..80 && it.getString("text").length <= 8000)
-                                }
+                                ExtensionProtocol.panel(safePayload)
                             }.getOrNull()
                             if (value == null) outcome = "invalid result"
                             output.value = if (value != null) CompanionPanel(entry.descriptor.name, value.getString("title"),
@@ -192,7 +206,7 @@ class CompanionManager(private val context: Context) {
         sessions[task] = session; live.value = sessions.values.map { it.entry.key }.toSet()
         session.deadline = scope.launch { delay(30_000); if (sessions.containsKey(task)) finish(task, "deadline exceeded") }
         session.verification = scope.launch {
-        val verified = withContext(Dispatchers.IO) { runCatching { discover().firstOrNull { it.key == key } }.getOrNull() }
+        val verified = withContext(Dispatchers.IO) { verify(entry.component) }
         if (!valid(task) || verified?.identity != entry.identity) {
             finish(task, "package changed"); refresh(); return@launch
         }
@@ -249,9 +263,9 @@ class CompanionManager(private val context: Context) {
                 try {
                 val response = runCatching { networkSlots.withPermit { withContext(Dispatchers.IO) {
                     check(!session.cancelled.get())
-                    checkJsonDepth(payload)
-                    val data = JSONObject(payload); require(data.keys().asSequence().toList() == listOf("url"))
-                    val uri = ExtensionManifest.allowed(data.getString("url"), session.entry.descriptor.origins)
+                    val data = ExtensionProtocol.objectValue(payload, ExtensionProtocol.MAX_REQUEST_BYTES)
+                    require(data.keys().asSequence().toList() == listOf("url"))
+                    val uri = ExtensionManifest.allowed(data.get("url") as? String ?: error("URL must be text"), session.entry.descriptor.origins)
                     val call = client.newCall(Request.Builder().url(uri.toString()).get().build())
                     calls[call] = task
                     try {

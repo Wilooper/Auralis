@@ -12,8 +12,8 @@ android {
         applicationId = "app.auralis"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "0.6.0-dev"
+        versionCode = 9
+        versionName = "0.6.1-dev"
     }
     if (releaseKeystore != null) {
         signingConfigs {

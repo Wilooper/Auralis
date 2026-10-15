@@ -1,8 +1,10 @@
-# ReVa — 0.6.0-dev
+# ReVa — 0.6.1-dev
 
 ReVa keeps the existing local music player, adds a warm light theme and an installed companion-extension action SDK. Open Settings → Extensions → Native to review publisher identities, grant access and run companion features. Workers start only on demand, with task deadlines, foreground/background permission controls and bounded diagnostics. Install the Track Inspector sample APK from the workflow artifact to try a player action and a settings panel.
 
 Existing JSON/data extensions, HTTPS providers, sandboxed web dashboards and declarative skins remain compatible. No built-in AI, online lyrics provider, equalizer or Dolby processing is added. Engine replacement and YAML-driven companion installation require the follow-up integration gates; this action SDK does not claim those features are implemented. See the [implementation plan](docs/REVA-BASE-IMPLEMENTATION-PLAN.md) and [companion SDK guide](sdk/COMPANION-SDK.md).
+
+The stock Smart Flow analyzer and generated-playlist flow have been removed. Database version 3 drops only their computed profile cache, preserving music sources, songs, favorites and history. Playlist generation is reserved for future optional extensions. The [base-hardening plan](docs/CORE-HARDENING-PLAN.md) records this change and the companion lifecycle checks.
 
 See [SDK guide](sdk/README.md), [REST OpenAPI](sdk/openapi.json), [manifest schema](sdk/manifest.schema.json), [host bridge schema](sdk/host-bridge.schema.json), and [v5 notes](V5-SDK.md).
 
@@ -26,7 +28,6 @@ A local-first Android music player. The current development prototype uses Kotli
 - Persistent Favorites and service-recorded History; Home/Favorites/Queue/Lyrics navigation.
 - Dedicated Settings for all music folder/file management.
 - Queue Play next, move and remove actions.
-- Cached, opt-in local audio analysis and 25-song gradual Smart Flow previews.
 - Embedded artwork and platform-readable metadata, with filename fallback.
 - Service-owned playback, media notification/session, audio focus and unplug pause.
 - Automatic embedded lyrics: plain text, line LRC, enhanced word LRC, ID3 SYLT and common TTML timing.
@@ -79,9 +80,9 @@ The project currently uses three Gradle modules. Extension registry, bridge, man
 
 ## Next Gates
 
-First: validate cache startup, automatic downloads, covers and lifecycle behavior on an ARM64 phone. Next validate Smart Flow, DJ blend and the v5 extension bridge on a diverse real library. Future work includes saved playlists, command playlists, deeper recommendations, service-specific adapters, synchronized parties and extension-store distribution.
+First: validate library upgrade/startup, covers, queue continuity and companion cancellation on an ARM64 phone. Continue validating manual crossfade/DJ blend and the extension bridge on a diverse real library. Future work includes optional extension-provided playlist generation, verified companion distribution and additional extension contracts.
 
-No trained ML model, phone-hosted browser sharing server, executable on-device plugin runtime, extension store or equalizer is implemented. Declarative provider/skin/embed manifests, HTTPS playback and a theme editor are implemented; party mode currently shares server queues. Smart Flow uses cached acoustic heuristics. No promise of universal codec support is made. File grants can be revoked; such failures must be surfaced and tested.
+No trained ML model, built-in playlist generator, phone-hosted browser sharing server, extension store or equalizer is implemented. Installed companion action workers, declarative provider/skin/embed manifests, brokered HTTPS and a theme editor are implemented; legacy party mode shares server queues. ReVa does not load downloaded executable code into its own process. No promise of universal codec support is made. File grants can be revoked; such failures must be surfaced and tested.
 
 ## Termux
 

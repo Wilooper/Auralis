@@ -4,6 +4,12 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class ModelTest {
+    @Test fun djEnvelopeHasSofterEntranceAndBoundedOverlap() {
+        assertTrue(FadeEnvelope.at(.1, true).incoming < FadeEnvelope.at(.1).incoming)
+        assertEquals(1.0, FadeEnvelope.at(0.0, true).outgoing, 1e-9)
+        assertEquals(1.0, FadeEnvelope.at(1.0, true).incoming, 1e-9)
+        for (i in 0..100) { val gains = FadeEnvelope.at(i / 100.0, true); assertTrue(gains.outgoing + gains.incoming <= 1.000001) }
+    }
     @Test fun fadeEndpointsAndClamping() {
         assertEquals(1.0, FadeEnvelope.at(-1.0).outgoing, 0.00001)
         assertEquals(0.0, FadeEnvelope.at(0.0).incoming, 0.00001)

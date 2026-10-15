@@ -37,7 +37,11 @@ Native C++/Rust can be packaged as Android `.so` libraries inside the companion 
 
 The Native page lists the last 100 host-controlled task/network lifecycle events. Raw extension exceptions, request URLs, credentials and response bodies are not logged. CPU/RAM attribution and native symbolication require further device tooling; the event list is not a full debugger. Cancel tasks, disable an extension or change its grants to invalidate outstanding sessions.
 
+The host coalesces discovery refreshes through one serialized, cancellation-aware scan. Activation checks only the selected package/service rather than rescanning the entire installed list twice. Returning after device sleep also expires elapsed task leases before admitting new work.
+
 Three worker/protocol failures in a host session suspend the extension and clear its grants. Review access again to retry. Admission gates reject excess Binder requests before posting to the main looper; terminal callbacks are accepted at most once. Pending network jobs and deadline timers are cancelled when a session ends.
+
+SDK v2 envelopes now use the shared `ExtensionProtocol` strict JSON reader: UTF-8 byte limits, nesting limits, duplicate-key/trailing-value rejection and typed result-panel fields. Host replies with the wrong request ID, repeated callbacks, or replies after task completion are ignored. Cooperative workers release admission before delivering their terminal callback, so its receiver can immediately submit another action. Cancellation interrupts the task; an unresponsive running action retains its original self-watchdog even during service shutdown. None of this extends the trust boundary to unrelated APK components.
 
 ## YAML distribution envelope (planned, not an executable loader)
 

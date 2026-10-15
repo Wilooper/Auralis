@@ -84,9 +84,6 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
     val extensionPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { it?.let(extensions::importFile) }
     val webEntry = extensionRows.firstOrNull { it.enabled && "web.embed" in it.grants && it.manifest.id == webId && it.manifest.web != null }
     LaunchedEffect(webEntry, webId) { if(webId != null && webEntry == null) webId = null }
-    var flowDialog by rememberSaveable { mutableStateOf(false) }
-    val flow: FlowViewModel = viewModel()
-    val flowState by flow.state.collectAsStateWithLifecycle()
     val library: LibraryViewModel = viewModel()
     val home by library.home.collectAsStateWithLifecycle()
     val owner = LocalLifecycleOwner.current
@@ -127,7 +124,6 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
                         Text("ReVa", Modifier.padding(start = 9.dp), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
                 }, actions = {
-                    IconButton(onClick = { flow.reload(); flowDialog = true }) { Icon(Icons.Rounded.AutoAwesome, "Create a gradual playlist") }
                     IconButton(onClick = { settings = true }) { Icon(Icons.Rounded.Settings, "Appearance and playback settings") }
                 }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background))
             }, bottomBar = {
@@ -192,11 +188,6 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
                 }
             }
         }
-    }
-    if (flowDialog) FlowDialog(flowState, flow, item?.mediaId, { flowDialog = false }) { tracks ->
-        if (Build.VERSION.SDK_INT >= 33) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-        model.playFlow(tracks)
-        flowDialog = false
     }
     CompanionPanelDialog()
 

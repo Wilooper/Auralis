@@ -20,7 +20,7 @@ class ExtensionTaskPolicy(private val clock: () -> Long, private val globalLimit
     } == true
     @Synchronized fun visibility(value: Boolean): List<Lease> {
         visible = value
-        return if (value) emptyList() else remove { !it.background }
+        return remove { clock() >= it.deadline || (!value && !it.background) }
     }
     @Synchronized fun expire(): List<Lease> = remove { clock() >= it.deadline }
     @Synchronized fun revoke(extension: String): List<Lease> = remove { it.extension == extension }

@@ -28,4 +28,11 @@ class ExtensionTaskPolicyTest {
         now = 30_000; assertFalse(policy.valid("a")); assertEquals(1, policy.expire().size)
         policy.begin("b", "two", true); policy.revoke("two"); assertFalse(policy.valid("b"))
     }
+    @Test fun returningAfterSleepExpiresBackgroundLeasesBeforeNewWork() {
+        policy.visibility(true); policy.begin("a", "one", true); policy.visibility(false)
+        now = 60_000
+        assertEquals(listOf("a"), policy.visibility(true).map { it.task })
+        assertTrue(policy.snapshot().isEmpty()); assertFalse(policy.valid("a"))
+        assertEquals("b", policy.begin("b", "one", false).task)
+    }
 }
