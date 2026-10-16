@@ -115,11 +115,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun playFlow(tracks: List<app.auralis.model.LibraryTrack>) {
-        if(tracks.isEmpty()) return
-        controller?.shuffleModeEnabled = false
-        playLibrary(tracks, tracks.first().id)
-    }
     fun playLibrary(tracks: List<app.auralis.model.LibraryTrack>, id: String) {
         val player = controller ?: return
         if (tracks.isEmpty()) return

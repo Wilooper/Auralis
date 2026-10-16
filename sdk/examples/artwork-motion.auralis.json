@@ -1,0 +1,19 @@
+{
+  "apiVersion": 1,
+  "id": "app.reva.artwork-motion",
+  "name": "Artwork Motion",
+  "version": "1.0.0",
+  "capabilities": [
+    "artwork.apply"
+  ],
+  "origins": [],
+  "artwork": {
+    "motions": [
+      "drift",
+      "tilt",
+      "none"
+    ],
+    "motion": "drift",
+    "sizePercent": 90
+  }
+}

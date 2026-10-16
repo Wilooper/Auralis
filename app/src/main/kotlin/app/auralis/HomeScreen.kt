@@ -39,23 +39,21 @@ internal fun TrackCover(uri: Uri?, title: String, modifier: Modifier = Modifier,
     val context = LocalContext.current
     val skin = LocalSkin.current
     val primary = MaterialTheme.colorScheme.primary
-    val colors = remember(title, primary) { listOf(primary.copy(alpha = .38f), Color(0xFF252C29), Color(0xFF131715)) }
-    val motionAllowed = animate && skin.coverMotion != "none" && android.animation.ValueAnimator.areAnimatorsEnabled()
-    val scale = if(motionAllowed && skin.coverMotion == "pulse") {
-        rememberInfiniteTransition(label = "cover-pulse").animateFloat(1f, 1.035f,
-            infiniteRepeatable(tween(2400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "cover-scale").value
-    } else 1f
-    val rotation = if(motionAllowed && skin.coverMotion == "turntable") {
-        rememberInfiniteTransition(label = "cover-turntable").animateFloat(0f, 360f,
-            infiniteRepeatable(tween(24_000, easing = LinearEasing)), label = "cover-rotation").value
-    } else 0f
-    val request = remember(uri, skin.artworkStyle, skin.primary, skin.background) {
-        ImageRequest.Builder(context).data(uri).size(128).allowHardware(false)
-            .transformations(ArtworkTreatment(skin.artworkStyle, android.graphics.Color.parseColor(skin.primary), android.graphics.Color.parseColor(skin.background)))
-            .build()
-    }
-    Box(modifier.graphicsLayer { scaleX = scale; scaleY = scale; rotationZ = rotation }.clip(shape).background(Brush.linearGradient(colors)), contentAlignment = Alignment.Center) {
-        Icon(Icons.Rounded.Album, null, Modifier.size(32.dp), tint = Color.White.copy(alpha = .45f))
+    val surface = MaterialTheme.colorScheme.surfaceContainerHigh
+    val colors = remember(title, primary, surface) { listOf(primary.copy(alpha = .18f), surface, surface) }
+    val motion = LocalArtwork.current?.motion ?: skin.coverMotion
+    val motionModifier = artworkMotionModifier(animate, motion)
+    BoxWithConstraints(modifier.then(motionModifier).clip(shape).background(Brush.linearGradient(colors)), contentAlignment = Alignment.Center) {
+        val target = if (constraints.hasBoundedWidth) with(androidx.compose.ui.platform.LocalDensity.current) { maxWidth.roundToPx().coerceIn(64, 2048) } else 128
+        val request = remember(uri, target, skin.artworkStyle, skin.primary, skin.background) {
+            ImageRequest.Builder(context).data(uri).size(target).apply {
+                if (skin.artworkStyle != "image") {
+                    allowHardware(false)
+                    transformations(ArtworkTreatment(skin.artworkStyle, android.graphics.Color.parseColor(skin.primary), android.graphics.Color.parseColor(skin.background)))
+                }
+            }.build()
+        }
+        Icon(Icons.Rounded.Album, null, Modifier.size(32.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         if (uri != null) AsyncImage(request, "Artwork for $title", Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
     }
 }
@@ -69,6 +67,7 @@ internal fun HomeScreen(home: HomeState, library: LibraryViewModel, canPlay: Boo
     val discover = skin.layout != "compact" && !favoritesOnly && home.query.isBlank() && !openGroup && home.browse == LibraryBrowse.SONGS
     val featured = home.played.firstOrNull() ?: home.recent.firstOrNull()
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+        item(key = "companion-library-actions") { Column(Modifier.padding(horizontal = 20.dp)) { app.auralis.extensions.CompanionActions("library") } }
         item(key = "welcome") {
             Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
                 Text(if (favoritesOnly) "YOUR PERSONAL MIX" else when (java.time.LocalTime.now().hour) {

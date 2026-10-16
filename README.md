@@ -1,6 +1,10 @@
-# ReVa — 0.5.1-dev
+# ReVa — 0.7.0-dev
 
-ReVa keeps the existing local music player and adds a reviewed extension foundation: HTTPS music providers, server-hosted party queues, sandboxed web players and developer dashboards, and declarative UI skins with ASCII/monochrome/duotone artwork and low-cost cover animation presets. Open Settings → Extensions & internet to import/review/toggle extensions or customize appearance. Extensions are data-only; approved server requests and sandboxed web views are permission-gated. No native extension code runs on the phone.
+ReVa keeps the existing local music player, adds a warm light theme and an installed companion-extension action SDK. Open Settings → Extensions → Native to review publisher identities, grant access and run companion features. Workers start only on demand, with task deadlines, foreground/background permission controls and bounded diagnostics. Install the Track Inspector sample APK from the workflow artifact to try a player action and a settings panel.
+
+Existing JSON/data extensions, HTTPS providers, sandboxed web dashboards and declarative skins remain compatible. No built-in AI, online lyrics provider, equalizer or Dolby processing is added. Engine replacement and YAML-driven companion installation require the follow-up integration gates; this action SDK does not claim those features are implemented. See the [implementation plan](docs/REVA-BASE-IMPLEMENTATION-PLAN.md) and [companion SDK guide](sdk/COMPANION-SDK.md).
+
+The stock Smart Flow analyzer and generated-playlist flow have been removed. Database version 3 drops only their computed profile cache, preserving music sources, songs, favorites and history. Playlist generation is reserved for future optional extensions. The [base-hardening plan](docs/CORE-HARDENING-PLAN.md) records this change and the companion lifecycle checks.
 
 See [SDK guide](sdk/README.md), [REST OpenAPI](sdk/openapi.json), [manifest schema](sdk/manifest.schema.json), [host bridge schema](sdk/host-bridge.schema.json), and [v5 notes](V5-SDK.md).
 
@@ -16,14 +20,14 @@ A local-first Android music player. The current development prototype uses Kotli
 - Home with recently added/played songs, songs/artists/albums browsing and Unicode song/artist/album search.
 - Lazy embedded artwork with a bounded disk cache, song-row covers and a mini player.
 - Saved queue and position checkpoint; recovery is paused until you press Play.
-- New dark discovery layout with cover shelves, album/artist grids and a rose default accent.
-- Immersive player and large synchronized lyrics over a cached soft album-art backdrop.
+- Light discovery layout with warm neutral surfaces, deep teal accents, cover shelves and album/artist grids. Explicit custom dark skins remain supported.
+- Large synchronized lyrics with readable inactive lines and accent-highlighted active words; artwork atmosphere is optional.
+- Original embedded artwork retained in a bounded cache and decoded for the display size, avoiding fixed 128-pixel full-player covers.
 - Floating mini player; Music/Lyrics switching and lyrics follow that pauses while reading ahead.
 - LibVLC decoding, play/pause/seek, previous/next, shuffle and repeat off/all/one.
 - Persistent Favorites and service-recorded History; Home/Favorites/Queue/Lyrics navigation.
 - Dedicated Settings for all music folder/file management.
 - Queue Play next, move and remove actions.
-- Cached, opt-in local audio analysis and 25-song gradual Smart Flow previews.
 - Embedded artwork and platform-readable metadata, with filename fallback.
 - Service-owned playback, media notification/session, audio focus and unplug pause.
 - Automatic embedded lyrics: plain text, line LRC, enhanced word LRC, ID3 SYLT and common TTML timing.
@@ -41,7 +45,7 @@ Compilation is not device verification. Read [BUILD-RESULTS.md](BUILD-RESULTS.md
 Install JDK 17 and Android SDK platform 36 / build tools 35.0.0. Android Studio can install these. Set `ANDROID_HOME` to your SDK directory, or put `sdk.dir=/absolute/path/to/sdk` in an untracked `local.properties` file.
 
 ```sh
-./gradlew :core-model:test :app:testDebugUnitTest :core-playback:lintDebug :app:lintDebug :app:assembleDebug
+./gradlew :core-model:test :app:testDebugUnitTest :core-playback:lintDebug :extension-sdk:lintDebug :sample-extension:lintDebug :app:lintDebug :app:assembleDebug :sample-extension:assembleDebug
 ```
 
 Windows: use `gradlew.bat`. Dependencies and wrapper distribution are pinned, with lockfiles for the verified configurations. The Gradle distribution checksum is verified; builds still require network access for dependencies on first use.
@@ -52,7 +56,7 @@ APK outputs are in `app/build/outputs/apk/debug/`. Prefer the `arm64-v8a` APK on
 
 1. Open **Settings** to add a music folder or individual files, then allow music access for the fast Android index. Saved folders and songs return after killing/reopening the app. Folder grants from 0.2 are recovered where Android still retains them. Actual decoding support depends on LibVLC.
 2. Play a track and open **Lyrics**. Embedded lyrics load automatically for the current track. Word sync highlights timed words; line sync scrolls to the current line; plain lyrics remain freely scrollable. Attach an LRC, TXT or supported TTML file with the folder icon; the restore icon switches back to embedded lyrics.
-3. Open **Settings** to change the accent or enable crossfade/DJ blend. Open **Extensions & internet** to import extensions, approve permissions, connect providers or edit appearance.
+3. Open **Settings** to change the accent or enable crossfade/DJ blend. Open **Extensions → Native** for installed companion APKs; the other tabs retain legacy JSON providers, skins and web dashboards.
 4. Tap the floating mini player to expand. Use Music/Lyrics below the player, the queue shortcut, or the collapse arrow/Android Back. Scroll timed lyrics to read ahead; use Follow lyrics to return, or wait six seconds.
 5. Test media controls and screen-off behavior using [DEVICE-CHECKLIST.md](DEVICE-CHECKLIST.md).
 
@@ -76,9 +80,9 @@ The project currently uses three Gradle modules. Extension registry, bridge, man
 
 ## Next Gates
 
-First: validate cache startup, automatic downloads, covers and lifecycle behavior on an ARM64 phone. Next validate Smart Flow, DJ blend and the v5 extension bridge on a diverse real library. Future work includes saved playlists, command playlists, deeper recommendations, service-specific adapters, synchronized parties and extension-store distribution.
+First: validate library upgrade/startup, covers, queue continuity and companion cancellation on an ARM64 phone. Continue validating manual crossfade/DJ blend and the extension bridge on a diverse real library. Future work includes optional extension-provided playlist generation, verified companion distribution and additional extension contracts.
 
-No trained ML model, phone-hosted browser sharing server, executable on-device plugin runtime, extension store or equalizer is implemented. Declarative provider/skin/embed manifests, HTTPS playback and a theme editor are implemented; party mode currently shares server queues. Smart Flow uses cached acoustic heuristics. No promise of universal codec support is made. File grants can be revoked; such failures must be surfaced and tested.
+No trained ML model, built-in playlist generator, phone-hosted browser sharing server, extension store or equalizer is implemented. Installed companion action workers, declarative provider/skin/embed manifests, brokered HTTPS and a theme editor are implemented; legacy party mode shares server queues. ReVa does not load downloaded executable code into its own process. No promise of universal codec support is made. File grants can be revoked; such failures must be surfaced and tested.
 
 ## Termux
 
@@ -95,3 +99,15 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md) for builds, tests and extension co
 One GitHub Actions workflow runs Android tests and lint, builds signature-verified APKs, and publishes APK assets for version tags. See [GitHub automation and signing setup](docs/GITHUB-AUTOMATION.md).
 
 CI APKs use an ephemeral development certificate and cannot update differently signed phone builds. Production releases require the private signing secrets described in the automation guide; keys never belong in this repository.
+
+## Artwork Motion sample
+
+Import `sdk/examples/artwork-motion.auralis.json` from Settings → Extensions → Extensions using a file or this GitHub raw link:
+
+`https://raw.githubusercontent.com/Wilooper/Auralis/codex/reva-base-sdk/sdk/examples/artwork-motion.auralis.json`
+
+Review and allow `artwork.apply`, then choose **Customize artwork**. Gentle drift, touch/pointer tilt and Still are available. Cover size is saved per extension (60–100% of the space available in Now playing). The preview uses the selected track cover, with a placeholder when no cover is available. Apply saves both choices; Cancel discards edits, Reset restores the extension defaults in the editor. No new APK, network capability or persistent worker is needed for this visual extension. The workflow APK bundle includes the manifest.
+
+Artwork extensions compose with skins. The last enabled artwork extension controls the player; disabling it restores the previous enabled contribution or skin motion. New versions require review again. Motion stops while paused, when ReVa is not resumed, with system animations disabled or with battery saver enabled. These are image transforms, not streamed motion videos. Battery and frame-time improvements have not been measured on a device.
+
+Both manifest and native managers offer name/ID search and status filters. Native extensions also expose per-task Stop and collapsible diagnostics.

@@ -84,3 +84,15 @@ Use a trusted TLS certificate/reverse proxy, configure your private hosting acce
 `apiVersion: 1` is explicitly versioned. Unknown capabilities, contribution fields, modes, operations and versions fail closed. URL installation, archive packages, publisher signatures, extension store discovery, executable extensions, arbitrary API proxying and scheduled/background modes are not implemented. A store can later distribute these same manifest files, but publishing/signature and update policy will need their own design.
 
 Security implementation references: [Android WebView file-access guidance](https://developer.android.com/privacy-and-security/risks/webview-unsafe-file-inclusion), [Android cleartext guidance](https://developer.android.com/privacy-and-security/risks/cleartext-communications), and [LibVLC per-media options](https://videolan.videolan.me/vlc/master/group__libvlc__media.html).
+
+## Independent artwork contributions
+
+Add capability `artwork.apply` and an `artwork` object:
+
+```json
+{"motions":["drift","tilt","none"],"motion":"drift","sizePercent":90}
+```
+
+`motions` must be a unique list of 1–3 host-supported renderers. `motion` must belong to it. `sizePercent` must be an integer in 60–100. Unknown keys, remote video URLs and scripts are rejected. See `examples/artwork-motion.auralis.json` for a complete importable example. This data-only visual contribution is intentionally separate from SDK v2 companion workers; it needs no process or frame-by-frame IPC. It leaves the selected skin unchanged.
+
+The host renders its own dashboard: a cover preview, motion options, bounded size slider and reset. Settings are per extension and persist across app restarts and disable/re-enable. Re-import/update resets them and disables the extension for fresh review. Last-enabled artwork wins, with automatic fallback after disable/removal. Small list art remains unchanged. Size refers to the available player layout, not source image resolution.

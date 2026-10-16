@@ -16,17 +16,17 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class ExtensionRegistry(private val context: Context) {
-    data class Entry(val manifest: ExtensionManifest, val enabled: Boolean, val revision: Long, val grants: Set<String> = emptySet(), val seekBarStyle: String? = null)
+    data class Entry(val manifest: ExtensionManifest, val enabled: Boolean, val revision: Long, val grants: Set<String> = emptySet(), val seekBarStyle: String? = null, val artworkMotion: String? = null, val artworkSize: Int? = null)
     private val prefs = context.getSharedPreferences("extensions-v1", Context.MODE_PRIVATE)
     private val mutable = MutableStateFlow(load())
     val entries = mutable.asStateFlow()
     var revoke: (String) -> Unit = {}
     private fun load(): List<Entry> = runCatching {
         val rows = JSONArray(prefs.getString("entries", "[]"))
-        (0 until minOf(rows.length(), 24)).map { val r = rows.getJSONObject(it); Entry(ExtensionManifest.parse(r.getString("manifest")), r.optBoolean("enabled"), r.optLong("revision", 1), r.optJSONArray("grants")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet(), r.optString("seekBarStyle").takeIf(String::isNotEmpty)) }
+        (0 until minOf(rows.length(), 24)).map { val r = rows.getJSONObject(it); Entry(ExtensionManifest.parse(r.getString("manifest")), r.optBoolean("enabled"), r.optLong("revision", 1), r.optJSONArray("grants")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet(), r.optString("seekBarStyle").takeIf(String::isNotEmpty), r.optString("artworkMotion").takeIf(String::isNotEmpty), r.optInt("artworkSize", 0).takeIf { it in 60..100 }) }
     }.getOrDefault(emptyList())
     @Synchronized private fun save(rows: List<Entry>) {
-        val encoded = JSONArray().apply { rows.forEach { put(JSONObject().put("manifest", it.manifest.raw).put("enabled", it.enabled).put("revision", it.revision).put("grants", JSONArray(it.grants.toList())).put("seekBarStyle", it.seekBarStyle ?: "")) } }
+        val encoded = JSONArray().apply { rows.forEach { put(JSONObject().put("manifest", it.manifest.raw).put("enabled", it.enabled).put("revision", it.revision).put("grants", JSONArray(it.grants.toList())).put("seekBarStyle", it.seekBarStyle ?: "").put("artworkMotion", it.artworkMotion ?: "").put("artworkSize", it.artworkSize ?: 0)) } }
         check(prefs.edit().putString("entries", encoded.toString()).commit()) { "Could not save extension settings" }
         mutable.value = rows
     }
@@ -63,6 +63,14 @@ class ExtensionRegistry(private val context: Context) {
         require(style in (entry.manifest.skin?.seekBarStyles ?: emptyList())) { "Style is not offered by this extension" }
         save(entries.value.map { if (it.manifest.id == id) it.copy(seekBarStyle = style) else it })
     }
+    @Synchronized fun chooseArtwork(id: String, motion: String, sizePercent: Int) {
+        val entry = requireEnabled(id, "artwork.apply")
+        val spec = entry.manifest.artwork ?: error("Extension has no artwork contribution")
+        require(motion in spec.motions && sizePercent in 60..100) { "Unsupported artwork setting" }
+        save(entries.value.map { if (it.manifest.id == id) it.copy(artworkMotion = motion, artworkSize = sizePercent) else it })
+    }
+    val activeArtworkEntry: Entry? get() = entries.value.lastOrNull { it.enabled && "artwork.apply" in it.grants && it.manifest.artwork != null }
+    val activeArtwork: ArtworkSpec? get() = activeArtworkEntry?.artworkSettings
     val activeSkin: Skin? get() = entries.value.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }?.let {
         it.manifest.skin!!.let { skin -> skin.copy(seekBarStyle = it.seekBarStyle?.takeIf { selected -> selected in skin.seekBarStyles } ?: skin.seekBarStyles.first()) }
     }
@@ -93,4 +101,9 @@ internal fun java.io.InputStream.readBytesBounded(max: Int): ByteArray {
     val output = java.io.ByteArrayOutputStream(); val buffer = ByteArray(8192)
     while(true) { val n = read(buffer); if(n == -1) break; require(output.size()+n <= max) { "Response/file exceeds $max bytes" }; output.write(buffer, 0, n) }
     return output.toByteArray()
+}
+
+val ExtensionRegistry.Entry.artworkSettings: ArtworkSpec? get() = manifest.artwork?.let { spec ->
+    spec.copy(motion = artworkMotion?.takeIf { it in spec.motions } ?: spec.motion,
+        sizePercent = artworkSize?.takeIf { it in 60..100 } ?: spec.sizePercent)
 }

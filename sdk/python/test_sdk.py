@@ -5,6 +5,18 @@ from reference_server import Server
 class SDKTest(unittest.TestCase):
     def test_examples_validate(self):
         for p in (Path(__file__).parent.parent/'examples').glob('*.json'): validate(json.loads(p.read_text()))
+    def test_artwork_is_bounded_and_needs_own_grant(self):
+        m=json.loads((Path(__file__).parent.parent/'examples/artwork-motion.auralis.json').read_text())
+        validate(m)
+        for value in [59,101,90.5,'90',None,True]:
+            m['artwork']['sizePercent']=value
+            with self.assertRaises(ValueError): validate(m)
+        m['artwork']['sizePercent']=90
+        m['artwork']['motions']=['drift','drift']
+        with self.assertRaises(ValueError): validate(m)
+        m['artwork']['motions']=['drift','tilt','none']
+        m['capabilities']=['skin.apply']
+        with self.assertRaises(ValueError): validate(m)
     def test_scripts_and_unsafe_origins_fail(self):
         m=provider('org.test.server','Test','https://music.example')
         m['script']='code.js'

@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <queries>
+        <intent><action android:name="app.reva.extension.WORKER" /></intent>
+    </queries>
     <application android:name=".ReVaApplication" android:allowBackup="false" android:usesCleartextTraffic="false" android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules" android:label="ReVa"
         android:icon="@drawable/ic_auralis" android:theme="@style/Theme.ReVa"

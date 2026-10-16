@@ -94,14 +94,29 @@ class LibraryPersistenceTest {
         assertEquals("1", db.browse("", LibraryBrowse.FAVORITES, 100).single().id)
         db.toggleFavorite("1"); assertTrue(db.favoriteIds().isEmpty())
     }
-    @Test fun analysisCacheInvalidatesChangedFilesAndHistoryCanClear() {
-        val row = track("1"); db.upsert(folder.uri, listOf(row))
-        db.saveAnalysis(row, SongFeatures(.6, 120.0, .3, .8)); db.markPlayed("1")
-        assertEquals(1, db.analyses().size); assertEquals(1, db.browse("", LibraryBrowse.HISTORY, 100).size)
+    @Test fun historyCanClearWithoutLosingSongsOrFavorites() {
+        val row = track("1"); db.upsert(folder.uri, listOf(row)); db.markPlayed("1"); db.toggleFavorite("1")
+        assertEquals(1, db.browse("", LibraryBrowse.HISTORY, 100).size)
         db.clearHistory(); assertTrue(db.browse("", LibraryBrowse.HISTORY, 100).isEmpty())
-        db.upsert(folder.uri, listOf(row.copy(modified = 22)))
-        assertTrue(db.analyses().isEmpty())
-        db.saveAnalysis(row, SongFeatures(.5, 100.0, .2, .8)); assertTrue(db.analyses().isEmpty())
+        assertEquals(row.title, db.track("1")!!.title); assertEquals(setOf("1"), db.favoriteIds())
+    }
+    @Test fun schemaTwoUpgradeDropsOnlyComputedProfilesAndPreservesTheLibrary() {
+        db.upsert(folder.uri, listOf(track("1", "Saved title")))
+        db.toggleFavorite("1"); db.markPlayed("1")
+        val played = db.track("1")!!.lastPlayed
+        val sql = db.writableDatabase
+        sql.execSQL("CREATE TABLE analysis(track TEXT PRIMARY KEY REFERENCES tracks(id) ON DELETE CASCADE,fingerprint TEXT NOT NULL,energy REAL NOT NULL,tempo REAL NOT NULL,brightness REAL NOT NULL,confidence REAL NOT NULL)")
+        sql.execSQL("INSERT INTO analysis VALUES('1','10:100',0.5,120,0.2,0.8)")
+        sql.version = 2
+        db.close(); db = LibraryDatabase(context, "library-test.db")
+        assertEquals("Saved title", db.track("1")!!.title)
+        assertEquals(folder, db.sources().single()); assertEquals(played, db.track("1")!!.lastPlayed)
+        assertEquals(setOf("1"), db.favoriteIds()); assertEquals(3, db.readableDatabase.version)
+        db.readableDatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='analysis'", null).use { assertFalse(it.moveToFirst()) }
+        db.reconcile(folder.uri, setOf("1")); assertEquals(1, db.count())
+    }
+    @Test fun newInstallHasNoAnalysisTable() {
+        db.readableDatabase.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='analysis'", null).use { assertFalse(it.moveToFirst()) }
     }
     @Test fun schemaOneUpgradeKeepsLibraryQueueAndHistory() {
         val legacy = context.openOrCreateDatabase("legacy.db", 0, null)
