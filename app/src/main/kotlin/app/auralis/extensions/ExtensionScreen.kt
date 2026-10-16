@@ -31,6 +31,9 @@ fun ExtensionScreen(
     play: (String, List<ExtensionBridge.RemoteTrack>, String, Boolean) -> Unit,
     embed: (String) -> Unit,
 ) {
+    var artworkEditor by remember { mutableStateOf<String?>(null) }
+    var search by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf("All") }
     var styleEditor by remember { mutableStateOf(false) }
     var review by remember { mutableStateOf<ExtensionRegistry.Entry?>(null) }
     var remove by remember { mutableStateOf<ExtensionRegistry.Entry?>(null) }
@@ -40,11 +43,11 @@ fun ExtensionScreen(
     var selected by remember { mutableStateOf<String?>(null) }
     var query by remember { mutableStateOf("") }
     var sourceUrl by remember { mutableStateOf("") }
-    var mode by remember { mutableStateOf("Native") }
+    var mode by remember { mutableStateOf("Extensions") }
     var session by remember { mutableStateOf("") }
     var track by remember { mutableStateOf("") }
     if (mode == "Native") { Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             extensionModes.forEach { value -> TextButton(onClick = { mode = value }) { Text(value) } }
         }
         CompanionScreen()
@@ -70,7 +73,7 @@ fun ExtensionScreen(
                     },
                     Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     extensionModes.forEach { value ->
                         FilterChip(
                             selected = mode == value,
@@ -94,7 +97,7 @@ fun ExtensionScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 SummaryTile("${entries.size}", "Installed", Icons.Rounded.Extension, Modifier.weight(1f))
                 SummaryTile("${enabled.size}", "Enabled", Icons.Rounded.CheckCircle, Modifier.weight(1f))
-                SummaryTile("SDK v1", "Sandboxed", Icons.Rounded.Security, Modifier.weight(1f))
+                SummaryTile("Data", "Visual / services", Icons.Rounded.Security, Modifier.weight(1f))
             }
         }
         state.message?.let { message -> item(key = "extension-message") { MessageCard(message) } }
@@ -162,8 +165,20 @@ fun ExtensionScreen(
                     Text("${entries.size} / 24", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
+            item(key = "extension-search") {
+                OutlinedTextField(search, { search = it.take(120) }, Modifier.fillMaxWidth(), singleLine = true,
+                    label = { Text("Search extensions") }, leadingIcon = { Icon(Icons.Rounded.Search, null) })
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("All", "Enabled", "Off").forEach { value -> FilterChip(status == value, { status = value }, label = { Text(value) }) }
+                }
+            }
+            val visible = entries.filter { row ->
+                (status == "All" || row.enabled == (status == "Enabled")) &&
+                    (search.isBlank() || row.manifest.name.contains(search, true) || row.manifest.id.contains(search, true))
+            }
             if (entries.isEmpty()) item(key = "extension-empty") { ExtensionEmptyState(import) }
-            items(entries, key = { "extension:${it.manifest.id}" }) { row ->
+            else if (visible.isEmpty()) item(key = "extension-no-match") { Text("No extensions match your search and filter.") }
+            items(visible, key = { "extension:${it.manifest.id}" }) { row ->
                 ExtensionCard(
                     row = row,
                     busy = state.busy,
@@ -175,13 +190,15 @@ fun ExtensionScreen(
                     onCredentials = { credentials = row.manifest.id; token = "" },
                     onRemove = { remove = row },
                     onSeekStyle = { model.chooseSeekBarStyle(row.manifest.id, it) },
+                    onArtwork = { artworkEditor = row.manifest.id },
+                    artworkActive = model.registry.activeArtworkEntry?.manifest?.id == row.manifest.id,
                 )
             }
             item(key = "extension-safety-note") {
                 Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.Top) {
                     Icon(Icons.Rounded.Info, null, Modifier.padding(top = 2.dp).size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(
-                        "Extensions use declared ReVa APIs. They do not install APKs or native code, and do not get local files or device controls. Network requests require an approved server and are user-triggered.",
+                        "These manifests contain data, not executable code. Artwork controls need no internet or file access. Installed companion APKs are managed in Native; network requests require approved access.",
                         Modifier.padding(start = 9.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -286,6 +303,13 @@ fun ExtensionScreen(
         }
     }
 
+    artworkEditor?.let { id ->
+        val current = entries.firstOrNull { it.manifest.id == id && it.enabled && "artwork.apply" in it.grants }
+        if (current == null) LaunchedEffect(id) { artworkEditor = null }
+        else ArtworkDashboard(current, state.busy, { artworkEditor = null }) { motion, size ->
+            model.chooseArtwork(id, motion, size); artworkEditor = null
+        }
+    }
     if (styleEditor) SkinEditor(app.auralis.LocalSkin.current, { styleEditor = false }) { model.createSkin(it); styleEditor = false }
     review?.let { row ->
         AlertDialog(
@@ -357,6 +381,8 @@ private fun ExtensionCard(
     onCredentials: () -> Unit,
     onRemove: () -> Unit,
     onSeekStyle: (String) -> Unit,
+    onArtwork: () -> Unit,
+    artworkActive: Boolean,
 ) {
     val skin = row.manifest.skin
     Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
@@ -365,6 +391,7 @@ private fun ExtensionCard(
                 Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = .13f)) {
                     Icon(
                         when {
+                            row.manifest.artwork != null -> Icons.Rounded.Album
                             skin != null -> Icons.Rounded.Palette
                             row.manifest.web?.optString("role") == "dashboard" -> Icons.Rounded.DashboardCustomize
                             row.manifest.party != null -> Icons.Rounded.Groups
@@ -392,6 +419,11 @@ private fun ExtensionCard(
                         FilterChip((row.seekBarStyle ?: skin.seekBarStyles.first()) == style, { onSeekStyle(style) }, label = { Text(style.replaceFirstChar(Char::uppercase)) }, enabled = !busy, shape = CircleShape)
                     }
                 }
+            }
+            if (row.manifest.artwork != null) {
+                Text(if (artworkActive) "Controls Now playing artwork" else "Enable to use artwork controls. The last enabled artwork extension takes priority.",
+                    Modifier.padding(top = 10.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                FilledTonalButton(onArtwork, enabled = !busy && row.enabled && "artwork.apply" in row.grants) { Text("Customize artwork") }
             }
             HorizontalDivider(Modifier.padding(top = 12.dp, bottom = 4.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .45f))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

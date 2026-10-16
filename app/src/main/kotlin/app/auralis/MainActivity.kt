@@ -62,7 +62,10 @@ class MainActivity : ComponentActivity() {
                 val bar = if (dark) SystemBarStyle.dark(android.graphics.Color.TRANSPARENT) else SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
                 enableEdgeToEdge(statusBarStyle = bar, navigationBarStyle = bar)
             }
-            ReVaTheme(state.accent, skin) { ReVaScreen(state, model) }
+            val artwork = entries.lastOrNull { it.enabled && "artwork.apply" in it.grants && it.manifest.artwork != null }?.artworkSettings
+            CompositionLocalProvider(LocalArtwork provides artwork) {
+                ReVaTheme(state.accent, skin) { ReVaScreen(state, model) }
+            }
         }
     }
     override fun onStart() { super.onStart(); (application as ReVaApplication).companions.visibility(true) }

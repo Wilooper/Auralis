@@ -26,6 +26,9 @@ fun CompanionScreen() {
     val entries by manager.entries.collectAsStateWithLifecycle()
     val events by manager.events.collectAsStateWithLifecycle()
     val running by manager.running.collectAsStateWithLifecycle()
+    var search by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf("All") }
+    var diagnostics by remember { mutableStateOf(false) }
     var review by remember { mutableStateOf<CompanionEntry?>(null) }
     var allowed by remember { mutableStateOf(emptySet<String>()) }
     var background by remember { mutableStateOf(false) }
@@ -39,6 +42,19 @@ fun CompanionScreen() {
                 if (running.isNotEmpty()) TextButton(onClick = manager::cancelAll) { Text("Cancel tasks") }
             }
         }
+        item {
+            Text("${entries.size} installed · ${entries.count { it.enabled }} enabled · ${running.size} running", style = MaterialTheme.typography.labelLarge)
+            OutlinedTextField(search, { search = it.take(120) }, Modifier.fillMaxWidth().padding(top = 12.dp), singleLine = true,
+                label = { Text("Search native extensions") }, leadingIcon = { Icon(Icons.Rounded.Search, null) })
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("All", "Enabled", "Off", "Running").forEach { value -> FilterChip(status == value, { status = value }, label = { Text(value) }) }
+            }
+        }
+        val visible = entries.filter { entry ->
+            (when (status) { "Enabled" -> entry.enabled; "Off" -> !entry.enabled; "Running" -> entry.key in running; else -> true }) &&
+                (search.isBlank() || entry.descriptor.name.contains(search, true) || entry.component.packageName.contains(search, true))
+        }
+        if (entries.isNotEmpty() && visible.isEmpty()) item { Text("No native extensions match your search and filter.") }
         if (entries.isEmpty()) item {
             Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer) {
                 Column(Modifier.padding(20.dp)) {
@@ -48,7 +64,7 @@ fun CompanionScreen() {
                 }
             }
         }
-        items(entries, key = { it.key }) { entry ->
+        items(visible, key = { it.key }) { entry ->
             Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer) {
                 Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(entry.descriptor.name, style = MaterialTheme.typography.titleLarge)
@@ -57,6 +73,7 @@ fun CompanionScreen() {
                     Text("${entry.descriptor.actions.size} actions · ${if (entry.background) "background approved" else "foreground processing"}", style = MaterialTheme.typography.bodySmall)
                     Row {
                         TextButton(onClick = { review = entry; allowed = entry.grants; background = entry.background }) { Text("Review access") }
+                        if (entry.key in running) TextButton(onClick = { manager.cancel(entry.key) }) { Text("Stop task") }
                         if (entry.enabled) TextButton(onClick = { manager.grant(entry.key, emptySet()) }) { Text("Disable") }
                     }
                 }
@@ -67,9 +84,9 @@ fun CompanionScreen() {
             Text("Two tasks at once, one per extension. Tasks stop when ReVa leaves the foreground unless background processing was explicitly approved. Playback continues independently.", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodyMedium)
             Text("Android controls process cleanup. These are task and connection limits, not hard CPU or RAM quotas for an entire companion APK.", Modifier.padding(top = 6.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        item { Text("Diagnostics · last ${events.size} events", style = MaterialTheme.typography.titleMedium) }
-        if (events.isEmpty()) item { Text("No workers have run in this session.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        items(events.asReversed()) { event ->
+        item { TextButton(onClick = { diagnostics = !diagnostics }) { Text("${if (diagnostics) "Hide" else "Show"} diagnostics · ${events.size} events") } }
+        if (diagnostics && events.isEmpty()) item { Text("No workers have run in this session.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        if (diagnostics) items(events.asReversed()) { event ->
             Text("${event.name} · ${event.event}", style = MaterialTheme.typography.bodySmall)
         }
     }

@@ -76,7 +76,7 @@ internal fun NowPlaying(state: PlayerScreenState, model: PlayerViewModel, loved:
     val metadata = item.mediaMetadata
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val reserve = 362.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)
-        val cover = minOf(maxWidth - 56.dp, (maxHeight - reserve).coerceAtLeast(100.dp), 360.dp)
+        val cover = minOf(maxWidth - 56.dp, (maxHeight - reserve).coerceAtLeast(100.dp), 360.dp) * ((LocalArtwork.current?.sizePercent ?: 100) / 100f)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 28.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(metadata.albumTitle?.toString()?.takeUnless { it == "Unknown album" } ?: "Your collection",
                 style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f), maxLines = 1, overflow = TextOverflow.Ellipsis)

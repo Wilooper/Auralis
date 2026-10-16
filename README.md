@@ -1,4 +1,4 @@
-# ReVa — 0.6.1-dev
+# ReVa — 0.7.0-dev
 
 ReVa keeps the existing local music player, adds a warm light theme and an installed companion-extension action SDK. Open Settings → Extensions → Native to review publisher identities, grant access and run companion features. Workers start only on demand, with task deadlines, foreground/background permission controls and bounded diagnostics. Install the Track Inspector sample APK from the workflow artifact to try a player action and a settings panel.
 
@@ -99,3 +99,15 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md) for builds, tests and extension co
 One GitHub Actions workflow runs Android tests and lint, builds signature-verified APKs, and publishes APK assets for version tags. See [GitHub automation and signing setup](docs/GITHUB-AUTOMATION.md).
 
 CI APKs use an ephemeral development certificate and cannot update differently signed phone builds. Production releases require the private signing secrets described in the automation guide; keys never belong in this repository.
+
+## Artwork Motion sample
+
+Import `sdk/examples/artwork-motion.auralis.json` from Settings → Extensions → Extensions using a file or this GitHub raw link:
+
+`https://raw.githubusercontent.com/Wilooper/Auralis/codex/reva-base-sdk/sdk/examples/artwork-motion.auralis.json`
+
+Review and allow `artwork.apply`, then choose **Customize artwork**. Gentle drift, touch/pointer tilt and Still are available. Cover size is saved per extension (60–100% of the space available in Now playing). The preview uses a sample cover placeholder. Apply saves both choices; Cancel discards edits, Reset restores the extension defaults in the editor. No new APK, network capability or persistent worker is needed for this visual extension. The workflow APK bundle includes the manifest.
+
+Artwork extensions compose with skins. The last enabled artwork extension controls the player; disabling it restores the previous enabled contribution or skin motion. New versions require review again. Motion stops while paused, when ReVa is not resumed, with system animations disabled or with battery saver enabled. These are image transforms, not streamed motion videos. Battery and frame-time improvements have not been measured on a device.
+
+Both manifest and native managers offer name/ID search and status filters. Native extensions also expose per-task Stop and collapsible diagnostics.

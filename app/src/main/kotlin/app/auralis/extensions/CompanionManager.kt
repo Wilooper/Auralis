@@ -156,6 +156,7 @@ class CompanionManager(private val context: Context) {
         if (!value.share || entries.value.none { it.key == value.sourceKey && it.identity == value.sourceIdentity && it.enabled && "share.text" in it.grants }) return null
         return Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, value.text)
     }
+    fun cancel(key: String) { sessions.filterValues { it.entry.key == key }.keys.toList().forEach { finish(it, "cancelled by user") } }
     fun cancelAll() { sessions.keys.toList().forEach { finish(it, "cancelled by user") } }
     fun invoke(key: String, action: CompanionAction, input: JSONObject = JSONObject()) {
         check(Looper.myLooper() == Looper.getMainLooper())

@@ -1,3 +1,13 @@
+## Artwork Motion / manager acceptance checks (0.7.0)
+
+- Import the bundled artwork manifest, grant artwork.apply, and verify existing skin colours remain selected.
+- Customize: compare Drift, Tilt and Still, test touch and mouse hover, scroll across the cover and verify it does not capture scrolling. Save 60%, 90% and 100%; verify no transport overlap in portrait, landscape or large fonts. Cancel must not persist edits.
+- Restart ReVa: size/motion persist. Disable/re-enable: settings return. Remove/update: active effects disappear; re-import requires review.
+- Try two artwork extensions: last enabled wins and disable/removal restores the previous one. Verify the manager identifies the active contribution.
+- Pause, open notification shade / switch apps, enable Battery Saver and set animator duration scale to zero: motion stops. Resume with animation enabled: motion returns. Still and list thumbnails must have no animation loop.
+- Filter and search both manager types, including no matches and narrow screens. Stop a native task without cancelling another extension's task. Expand/collapse diagnostics.
+- Measure frame times, memory and battery on a real device; desktop tests do not establish animation smoothness, thermal behaviour or power consumption.
+
 # ReVa 0.6.1 base-hardening checks
 
 - Upgrade a populated 0.6.0 install using the same signing key: songs, selected folders, favorites, history and queue recovery should remain. The Smart Flow button should be gone. Only the old computed-profile table is removed; debug builds signed with a different temporary key cannot perform this upgrade test.

@@ -79,13 +79,14 @@ jobs:
           cp "$apk_dir"/*.apk dist/
           bash scripts/ci/verify-apks.sh sample-extension/build/outputs/apk/debug
           cp sample-extension/build/outputs/apk/debug/sample-extension-debug.apk dist/reva-track-inspector-debug.apk
+          cp sdk/examples/artwork-motion.auralis.json dist/
           printf '%s\n' "ReVa $GITHUB_REF_NAME" "Source commit: $GITHUB_SHA" > dist/RELEASE-NOTES.md
           if [[ "${{ steps.version.outputs.prerelease }}" == "true" ]]; then
             printf '\n%s\n' 'Development build, signed with the temporary Android debug key. It cannot update builds signed with a different key.' >> dist/RELEASE-NOTES.md
           else
             printf '\n%s\n' 'Stable APKs signed with the configured ReVa release key.' >> dist/RELEASE-NOTES.md
           fi
-          (cd dist && sha256sum -- *.apk RELEASE-NOTES.md > SHA256SUMS.txt)
+          (cd dist && sha256sum -- *.apk *.json RELEASE-NOTES.md > SHA256SUMS.txt)
       - name: Upload APKs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -127,7 +128,7 @@ jobs:
             echo 'A release already exists for this tag; refusing to overwrite its APKs.' >&2
             exit 1
           fi
-          gh release create "$RELEASE_TAG" dist/*.apk dist/SHA256SUMS.txt dist/RELEASE-NOTES.md \
+          gh release create "$RELEASE_TAG" dist/*.apk dist/*.json dist/SHA256SUMS.txt dist/RELEASE-NOTES.md \
             --verify-tag --title "ReVa $RELEASE_TAG" --notes-file dist/RELEASE-NOTES.md --draft --prerelease="$PRERELEASE"
           if [[ "$PRERELEASE" == "true" ]]; then
             gh release edit "$RELEASE_TAG" --draft=false --latest=false

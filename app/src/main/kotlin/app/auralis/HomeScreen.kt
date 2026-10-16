@@ -41,16 +41,9 @@ internal fun TrackCover(uri: Uri?, title: String, modifier: Modifier = Modifier,
     val primary = MaterialTheme.colorScheme.primary
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     val colors = remember(title, primary, surface) { listOf(primary.copy(alpha = .18f), surface, surface) }
-    val motionAllowed = animate && skin.coverMotion != "none" && android.animation.ValueAnimator.areAnimatorsEnabled()
-    val scale = if(motionAllowed && skin.coverMotion == "pulse") {
-        rememberInfiniteTransition(label = "cover-pulse").animateFloat(1f, 1.035f,
-            infiniteRepeatable(tween(2400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "cover-scale").value
-    } else 1f
-    val rotation = if(motionAllowed && skin.coverMotion == "turntable") {
-        rememberInfiniteTransition(label = "cover-turntable").animateFloat(0f, 360f,
-            infiniteRepeatable(tween(24_000, easing = LinearEasing)), label = "cover-rotation").value
-    } else 0f
-    BoxWithConstraints(modifier.graphicsLayer { scaleX = scale; scaleY = scale; rotationZ = rotation }.clip(shape).background(Brush.linearGradient(colors)), contentAlignment = Alignment.Center) {
+    val motion = LocalArtwork.current?.motion ?: skin.coverMotion
+    val motionModifier = artworkMotionModifier(animate, motion)
+    BoxWithConstraints(modifier.then(motionModifier).clip(shape).background(Brush.linearGradient(colors)), contentAlignment = Alignment.Center) {
         val target = if (constraints.hasBoundedWidth) with(androidx.compose.ui.platform.LocalDensity.current) { maxWidth.roundToPx().coerceIn(64, 2048) } else 128
         val request = remember(uri, target, skin.artworkStyle, skin.primary, skin.background) {
             ImageRequest.Builder(context).data(uri).size(target).apply {

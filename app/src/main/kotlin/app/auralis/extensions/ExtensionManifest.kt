@@ -6,17 +6,14 @@ import java.net.URI
 /** V1 is data only. Never add reflection, dynamic libraries, eval, or package execution here. */
 data class ExtensionManifest(val id: String, val name: String, val version: String,
     val capabilities: Set<String>, val origins: Set<String>, val provider: JSONObject?,
-    val web: JSONObject?, val skin: Skin?, val party: JSONObject?, val raw: String) {
+    val web: JSONObject?, val skin: Skin?, val party: JSONObject?, val raw: String, val artwork: ArtworkSpec? = null) {
     companion object {
         const val MAX_BYTES = 65_536
-        val supported = setOf("catalog.read", "stream.play", "web.embed", "skin.apply", "party.session")
+        val supported = setOf("catalog.read", "stream.play", "web.embed", "skin.apply", "party.session", "artwork.apply")
         fun parse(text: String): ExtensionManifest {
             require(text.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) { "Extension exceeds 64 KiB" }
-            checkJsonDepth(text)
-            val tokener = org.json.JSONTokener(text)
-            val json = tokener.nextValue() as? JSONObject ?: error("Manifest must be a JSON object")
-            require(tokener.nextClean() == '\u0000') { "Trailing manifest content" }
-            require(json.keys().asSequence().all { it in setOf("apiVersion", "id", "name", "version", "capabilities", "origins", "provider", "web", "skin", "party") }) { "Unsupported manifest fields. Executable extensions are not supported." }
+            val json = app.reva.sdk.ExtensionProtocol.objectValue(text, MAX_BYTES)
+            require(json.keys().asSequence().all { it in setOf("apiVersion", "id", "name", "version", "capabilities", "origins", "provider", "web", "skin", "party", "artwork") }) { "Unsupported manifest fields. Executable extensions are not supported." }
             require(json.getInt("apiVersion") == 1) { "Unsupported SDK version" }
             val id = json.getString("id")
             require(id.matches(Regex("[a-z][a-z0-9]*(?:[.-][a-z0-9]+){1,7}")) && id.length <= 80) { "Use a reverse-domain extension ID" }
@@ -31,7 +28,7 @@ data class ExtensionManifest(val id: String, val name: String, val version: Stri
             val origins = strings("origins").map { value ->
                 val uri = URI(value); require(value == origin(uri) && uri.scheme == "https") { "Origins must be exact HTTPS origins, without paths" }; value
             }.toSet()
-            fun section(key: String, cap: String): JSONObject? = json.optJSONObject(key)?.also {
+            fun section(key: String, cap: String): JSONObject? = (if (json.has(key)) json.get(key) as? JSONObject ?: error("$key must be an object") else null)?.also {
                 require(cap in caps) { "$key needs $cap" }
             }
             val provider = section("provider", "catalog.read")
@@ -46,8 +43,9 @@ data class ExtensionManifest(val id: String, val name: String, val version: Stri
             val party = section("party", "party.session")
             party?.let { require(it.keys().asSequence().all { key -> key == "url" }); allowed(it.getString("url"), origins) }
             val skin = section("skin", "skin.apply")?.let(Skin::parse)
-            require(provider != null || web != null || party != null || skin != null) { "Extension has no supported contribution" }
-            return ExtensionManifest(id, name, version, caps, origins, provider, web, skin, party, json.toString())
+            val artwork = section("artwork", "artwork.apply")?.let(ArtworkSpec::parse)
+            require(provider != null || web != null || party != null || skin != null || artwork != null) { "Extension has no supported contribution" }
+            return ExtensionManifest(id, name, version, caps, origins, provider, web, skin, party, json.toString(), artwork)
         }
         fun origin(uri: URI): String {
             require(uri.isAbsolute && !uri.isOpaque && uri.host != null && uri.rawUserInfo == null && uri.port in -1..65535 && uri.port != 0) { "Invalid URL" }

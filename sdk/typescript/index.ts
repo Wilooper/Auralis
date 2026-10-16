@@ -1,5 +1,5 @@
 /** Manifest helpers run on the developer's computer or server, never inside ReVa. */
-export type Capability = 'catalog.read' | 'stream.play' | 'web.embed' | 'skin.apply' | 'party.session';
+export type Capability = 'catalog.read' | 'stream.play' | 'web.embed' | 'skin.apply' | 'party.session' | 'artwork.apply';
 export interface Skin {
   primary?: string; background?: string; surface?: string; text?: string; muted?: string;
   textScale?: number; rowHeight?: number; cornerRadius?: number; artworkSize?: number;
@@ -10,6 +10,7 @@ export interface Skin {
 }
 export interface ExtensionManifest {
   apiVersion: 1; id: string; name: string; version: string; capabilities: Capability[]; origins: string[];
+  artwork?: { motions: Array<'none' | 'drift' | 'tilt'>; motion: 'none' | 'drift' | 'tilt'; sizePercent: number };
   provider?: { catalogUrl: string }; web?: { url: string; role?: 'player' | 'dashboard' }; skin?: Skin; party?: { url: string };
 }
 export interface Track { id: string; title: string; artist?: string; streamUrl: string; format?: 'mp3' | 'flac' | 'wav' | 'ogg' }

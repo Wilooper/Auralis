@@ -3,7 +3,7 @@ from __future__ import annotations
 import json, re, argparse
 from pathlib import Path
 from urllib.parse import urlsplit
-CAPABILITIES = {'catalog.read', 'stream.play', 'web.embed', 'skin.apply', 'party.session'}
+CAPABILITIES = {'catalog.read', 'stream.play', 'web.embed', 'skin.apply', 'party.session', 'artwork.apply'}
 def origin(url: str) -> str:
     p = urlsplit(url)
     if p.scheme != 'https' or not p.hostname or p.username or p.password or '\\' in url:
@@ -13,7 +13,7 @@ def origin(url: str) -> str:
 def validate(m: dict) -> dict:
     encoded = json.dumps(m, ensure_ascii=False).encode()
     if len(encoded) > 65536: raise ValueError('Maximum manifest size is 64 KiB')
-    if set(m) - {'apiVersion','id','name','version','capabilities','origins','provider','web','skin','party'}: raise ValueError('Unknown or executable manifest field')
+    if set(m) - {'apiVersion','id','name','version','capabilities','origins','provider','web','skin','party','artwork'}: raise ValueError('Unknown or executable manifest field')
     if m.get('apiVersion') != 1: raise ValueError('Unsupported API version')
     if not re.fullmatch(r'[a-z][a-z0-9]*(?:[.-][a-z0-9]+){1,7}', m.get('id','')) or len(m['id']) > 80: raise ValueError('Invalid reverse-domain ID')
     if not isinstance(m.get('name'),str) or not 1 <= len(m['name'].strip()) <= 80 or not re.fullmatch(r'\d+\.\d+\.\d+',m.get('version','')): raise ValueError('Invalid name/version')
@@ -29,6 +29,12 @@ def validate(m: dict) -> dict:
             value = m[section][key]
             if len(value) > 2048 or origin(value) not in origins or urlsplit(value).fragment: raise ValueError('Contribution outside declared origins')
     if 'stream.play' in caps and 'provider' not in m: raise ValueError('Streaming needs a provider')
+    if 'artwork' in m:
+        a = m['artwork']
+        if 'artwork.apply' not in caps or not isinstance(a,dict) or set(a) != {'motions','motion','sizePercent'}: raise ValueError('Invalid artwork contribution')
+        motions = a['motions']
+        if not isinstance(motions,list) or not 1 <= len(motions) <= 3 or any(not isinstance(x,str) for x in motions) or len(set(motions)) != len(motions) or not set(motions) <= {'none','drift','tilt'}: raise ValueError('Invalid artwork motions')
+        if a['motion'] not in motions or type(a['sizePercent']) is not int or not 60 <= a['sizePercent'] <= 100: raise ValueError('Invalid artwork settings')
     if 'skin' in m:
         s = m['skin']
         if 'skin.apply' not in caps or set(s) - {'primary','background','surface','text','muted','textScale','rowHeight','cornerRadius','artworkSize','layout','font','atmosphere','seekBarStyles','artworkStyle','coverMotion'}: raise ValueError('Invalid skin contribution')
@@ -49,7 +55,7 @@ def validate(m: dict) -> dict:
             x,y = sorted((lum(colors[a]),lum(colors[b])))
             return (y+.05)/(x+.05)
         if any(contrast(a,b)<minimum for a,b,minimum in [('text','background',4.5),('text','surface',4.5),('muted','background',3),('muted','surface',3),('primary','background',3)]): raise ValueError('Skin colors need readable contrast')
-    if not set(m) & {'provider','web','skin','party'}: raise ValueError('No contribution')
+    if not set(m) & {'provider','web','skin','party','artwork'}: raise ValueError('No contribution')
     return m
 
 def provider(extension_id: str, name: str, base_url: str, party: bool = True) -> dict:

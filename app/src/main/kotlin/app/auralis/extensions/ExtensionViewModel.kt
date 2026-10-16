@@ -60,6 +60,7 @@ class ExtensionViewModel(application: Application) : AndroidViewModel(applicatio
     fun toggle(id: String, enabled: Boolean, grants: Set<String>? = null) = run { withContext(Dispatchers.IO) { if(grants == null) registry.enable(id, enabled) else registry.enable(id, enabled, grants) } }
     fun remove(id: String) = run { withContext(Dispatchers.IO) { registry.remove(id) } }
     fun chooseSeekBarStyle(id: String, style: String) = run { withContext(Dispatchers.IO) { registry.chooseSeekBarStyle(id, style) } }
+    fun chooseArtwork(id: String, motion: String, sizePercent: Int) = run { withContext(Dispatchers.IO) { registry.chooseArtwork(id, motion, sizePercent) } }
     fun token(id: String, text: String) = run { withContext(Dispatchers.IO) { registry.saveToken(id,text) }; mutable.value = mutable.value.copy(message = "Token saved. Review permissions to enable the extension.") }
     fun browse(id: String, query: String) {
         mutable.value = ExtensionState(provider = id)
