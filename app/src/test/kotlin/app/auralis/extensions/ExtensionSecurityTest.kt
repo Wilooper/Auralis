@@ -17,7 +17,7 @@ class ExtensionSecurityTest {
     @Test fun publishedSdkExamplesAreAcceptedByAndroid() {
         val root = java.io.File(System.getProperty("auralis.fixtures")).parentFile.resolve("sdk/examples")
         val examples = root.listFiles { file -> file.name.endsWith(".auralis.json") }!!
-        assertEquals(7,examples.size)
+        assertEquals(8,examples.size)
         examples.forEach { ExtensionManifest.parse(it.readText()) }
     }
     @Test fun scriptsAndNativeCodeCannotBeImported() { denied { ExtensionManifest.parse(manifest(",\"script\":\"evil.js\"")) }; denied { ExtensionManifest.parse(manifest().replace("catalog.read", "device.exec")) } }

@@ -170,7 +170,7 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
                 } else home.index.message?.let { StatusMessage(it) }
                 when {
                     extensionPage && webEntry != null -> WebEmbedScreen(webEntry) { webId = null }
-                    extensionPage -> ExtensionScreen(extensionRows, extensionState, extensions, { extensionPicker.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }, model::playRemote, { id -> if(state.playing) model.togglePlayback(); webId = id })
+                    extensionPage -> ExtensionScreen(extensionRows, extensionState, extensions, { extensionPicker.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }, model::playRemote, { id -> if(state.playing) model.togglePlayback(); webId = id }, artworkUri = item?.mediaMetadata?.artworkUri, artworkTitle = item?.mediaMetadata?.title?.toString() ?: "Artwork preview")
                     settings -> SettingsScreen(state, model, home, library, { changingFolder = null; folderPicker.launch(null) }, { audioPicker.launch(arrayOf("*/*")) }, { musicPermission.launch(AudioPermission.name) }, { source -> changingFolder = source.uri; folderPicker.launch(android.net.Uri.parse(source.uri)) }, { extensionPage = true })
                     tab == 0 || tab == 1 -> HomeScreen(home, library, state.connected, { tracks, id ->
                         if (Build.VERSION.SDK_INT >= 33) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)

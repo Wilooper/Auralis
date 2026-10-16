@@ -106,7 +106,7 @@ Import `sdk/examples/artwork-motion.auralis.json` from Settings → Extensions �
 
 `https://raw.githubusercontent.com/Wilooper/Auralis/codex/reva-base-sdk/sdk/examples/artwork-motion.auralis.json`
 
-Review and allow `artwork.apply`, then choose **Customize artwork**. Gentle drift, touch/pointer tilt and Still are available. Cover size is saved per extension (60–100% of the space available in Now playing). The preview uses a sample cover placeholder. Apply saves both choices; Cancel discards edits, Reset restores the extension defaults in the editor. No new APK, network capability or persistent worker is needed for this visual extension. The workflow APK bundle includes the manifest.
+Review and allow `artwork.apply`, then choose **Customize artwork**. Gentle drift, touch/pointer tilt and Still are available. Cover size is saved per extension (60–100% of the space available in Now playing). The preview uses the selected track cover, with a placeholder when no cover is available. Apply saves both choices; Cancel discards edits, Reset restores the extension defaults in the editor. No new APK, network capability or persistent worker is needed for this visual extension. The workflow APK bundle includes the manifest.
 
 Artwork extensions compose with skins. The last enabled artwork extension controls the player; disabling it restores the previous enabled contribution or skin motion. New versions require review again. Motion stops while paused, when ReVa is not resumed, with system animations disabled or with battery saver enabled. These are image transforms, not streamed motion videos. Battery and frame-time improvements have not been measured on a device.
 

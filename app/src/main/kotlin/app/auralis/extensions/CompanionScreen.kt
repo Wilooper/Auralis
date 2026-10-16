@@ -71,7 +71,7 @@ fun CompanionScreen() {
                     Text(entry.component.packageName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(if (entry.key in running) "Running · 30-second task budget" else if (entry.enabled) "Enabled · starts only when used" else "Off · review access to enable", color = MaterialTheme.colorScheme.primary)
                     Text("${entry.descriptor.actions.size} actions · ${if (entry.background) "background approved" else "foreground processing"}", style = MaterialTheme.typography.bodySmall)
-                    Row {
+                    Row(Modifier.horizontalScroll(rememberScrollState())) {
                         TextButton(onClick = { review = entry; allowed = entry.grants; background = entry.background }) { Text("Review access") }
                         if (entry.key in running) TextButton(onClick = { manager.cancel(entry.key) }) { Text("Stop task") }
                         if (entry.enabled) TextButton(onClick = { manager.grant(entry.key, emptySet()) }) { Text("Disable") }

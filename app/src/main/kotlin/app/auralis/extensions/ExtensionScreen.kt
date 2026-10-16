@@ -30,6 +30,8 @@ fun ExtensionScreen(
     import: () -> Unit,
     play: (String, List<ExtensionBridge.RemoteTrack>, String, Boolean) -> Unit,
     embed: (String) -> Unit,
+    artworkUri: android.net.Uri? = null,
+    artworkTitle: String = "Artwork preview",
 ) {
     var artworkEditor by remember { mutableStateOf<String?>(null) }
     var search by remember { mutableStateOf("") }
@@ -306,7 +308,7 @@ fun ExtensionScreen(
     artworkEditor?.let { id ->
         val current = entries.firstOrNull { it.manifest.id == id && it.enabled && "artwork.apply" in it.grants }
         if (current == null) LaunchedEffect(id) { artworkEditor = null }
-        else ArtworkDashboard(current, state.busy, { artworkEditor = null }) { motion, size ->
+        else ArtworkDashboard(current, state.busy, artworkUri, artworkTitle, { artworkEditor = null }) { motion, size ->
             model.chooseArtwork(id, motion, size); artworkEditor = null
         }
     }
@@ -321,7 +323,7 @@ fun ExtensionScreen(
                     row.manifest.capabilities.forEach { cap ->
                         Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(cap in allowed, { checked -> allowed = if (checked) allowed + cap else allowed - cap })
-                            Text(cap, Modifier.padding(start = 8.dp), style = MaterialTheme.typography.bodyMedium)
+                            Text(if (cap == "artwork.apply") "Animate and resize Now playing artwork (no network access)" else cap, Modifier.padding(start = 8.dp), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                     HorizontalDivider()

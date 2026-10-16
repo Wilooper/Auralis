@@ -12,7 +12,8 @@ data class ExtensionManifest(val id: String, val name: String, val version: Stri
         val supported = setOf("catalog.read", "stream.play", "web.embed", "skin.apply", "party.session", "artwork.apply")
         fun parse(text: String): ExtensionManifest {
             require(text.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) { "Extension exceeds 64 KiB" }
-            val json = app.reva.sdk.ExtensionProtocol.objectValue(text, MAX_BYTES)
+            val json = try { app.reva.sdk.ExtensionProtocol.objectValue(text, MAX_BYTES) }
+            catch (e: Exception) { throw IllegalArgumentException("Invalid extension JSON", e) }
             require(json.keys().asSequence().all { it in setOf("apiVersion", "id", "name", "version", "capabilities", "origins", "provider", "web", "skin", "party", "artwork") }) { "Unsupported manifest fields. Executable extensions are not supported." }
             require(json.getInt("apiVersion") == 1) { "Unsupported SDK version" }
             val id = json.getString("id")

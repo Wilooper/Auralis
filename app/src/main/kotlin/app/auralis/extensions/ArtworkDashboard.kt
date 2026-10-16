@@ -8,13 +8,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import app.auralis.LocalArtwork
 import app.auralis.TrackCover
 import kotlin.math.roundToInt
 
 @Composable
-internal fun ArtworkDashboard(entry: ExtensionRegistry.Entry, busy: Boolean, dismiss: () -> Unit, save: (String, Int) -> Unit) {
+internal fun ArtworkDashboard(entry: ExtensionRegistry.Entry, busy: Boolean, artworkUri: android.net.Uri?, artworkTitle: String, dismiss: () -> Unit, save: (String, Int) -> Unit) {
     val spec = entry.manifest.artwork ?: return
     val settings = entry.artworkSettings ?: return
     var motion by remember(entry.manifest.id, entry.revision) { mutableStateOf(settings.motion) }
@@ -24,7 +25,7 @@ internal fun ArtworkDashboard(entry: ExtensionRegistry.Entry, busy: Boolean, dis
             Text("Preview", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Box(Modifier.fillMaxWidth().height(184.dp), contentAlignment = Alignment.Center) {
                 CompositionLocalProvider(LocalArtwork provides spec.copy(motion = motion)) {
-                    TrackCover(null, "Artwork preview", Modifier.size((160 * size / 100).dp), RoundedCornerShape(20.dp), animate = true)
+                    TrackCover(artworkUri, artworkTitle, Modifier.size(160.dp).graphicsLayer { scaleX = size / 100; scaleY = scaleX }, RoundedCornerShape(20.dp), animate = true)
                 }
             }
             Text("Motion", style = MaterialTheme.typography.titleSmall)
