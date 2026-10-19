@@ -11,8 +11,8 @@ android {
 kotlin { jvmToolchain(17) }
 dependencies {
     implementation(project(":core-model"))
-    api("androidx.media3:media3-common:1.6.1")
-    api("androidx.media3:media3-session:1.6.1")
+    api("androidx.media3:media3-common:1.11.1")
+    api("androidx.media3:media3-session:1.11.1")
     implementation("org.videolan.android:libvlc-all:3.7.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 }
