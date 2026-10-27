@@ -1,3 +1,23 @@
+## Artwork Motion / manager acceptance checks (0.7.0)
+
+- Import the bundled artwork manifest, grant artwork.apply, and verify existing skin colours remain selected.
+- Customize: compare Drift, Tilt and Still, test touch and mouse hover, scroll across the cover and verify it does not capture scrolling. Save 60%, 90% and 100%; verify no transport overlap in portrait, landscape or large fonts. Cancel must not persist edits.
+- Restart ReVa: size/motion persist. Disable/re-enable: settings return. Remove/update: active effects disappear; re-import requires review.
+- Try two artwork extensions: last enabled wins and disable/removal restores the previous one. Verify the manager identifies the active contribution.
+- Pause, open notification shade / switch apps, enable Battery Saver and set animator duration scale to zero: motion stops. Resume with animation enabled: motion returns. Still and list thumbnails must have no animation loop.
+- Filter and search both manager types, including no matches and narrow screens. Stop a native task without cancelling another extension's task. Expand/collapse diagnostics.
+- Measure frame times, memory and battery on a real device; desktop tests do not establish animation smoothness, thermal behaviour or power consumption.
+
+# ReVa 0.6.1 base-hardening checks
+
+- Upgrade a populated 0.6.0 install using the same signing key: songs, selected folders, favorites, history and queue recovery should remain. The Smart Flow button should be gone. Only the old computed-profile table is removed; debug builds signed with a different temporary key cannot perform this upgrade test.
+- Play tracks while changing queue order, toggling shuffle/repeat and stepping previous/next. The displayed queue should remain stable and the active song should not change just from toggling shuffle.
+- Enable Track Inspector and invoke its action repeatedly on the same install. Results should not intermittently fail with a busy-worker error after the previous panel completes.
+- Check foreground-only task cancellation, explicit background grants, returning after sleep, repeated refresh taps, permission revocation and package replacement. Audio playback should continue while unrelated compute tasks are cancelled.
+- Record worker/process cleanup, frame timing, battery and total memory separately; desktop tests do not establish these device measurements.
+
+## Earlier player checklist
+
 # M0 Device Checklist
 
 Status: NOT RUN. Fill this in on a physical device before passing M0.

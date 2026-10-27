@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -23,7 +24,7 @@ import coil.request.ImageRequest
 import coil.size.Size
 import coil.transform.Transformation
 
-internal val accents = listOf(Color(0xFF69E0BE), Color(0xFFFF929D), Color(0xFF8FD8FF), Color(0xFFF5DB75), Color(0xFFFF647C))
+internal val accents = listOf(Color(0xFF006B5E), Color(0xFF934650), Color(0xFF315B96), Color(0xFF745B17), Color(0xFF77528B))
 
 internal val LocalSkin = staticCompositionLocalOf { Skin() }
 
@@ -42,11 +43,13 @@ internal fun ReVaTheme(accent: Int, customSkin: Skin? = null, content: @Composab
         titleLarge = style(base.titleLarge), titleMedium = style(base.titleMedium), titleSmall = style(base.titleSmall),
         bodyLarge = style(base.bodyLarge), bodyMedium = style(base.bodyMedium), bodySmall = style(base.bodySmall),
         labelLarge = style(base.labelLarge), labelMedium = style(base.labelMedium), labelSmall = style(base.labelSmall))
-    val onPrimary = if(androidx.core.graphics.ColorUtils.calculateLuminance(android.graphics.Color.parseColor(customSkin?.primary ?: "#FF647C")) > .179) Color.Black else Color.White
+    val onPrimary = if(androidx.core.graphics.ColorUtils.calculateLuminance(primary.toArgb()) > .179) Color.Black else Color.White
+    val light = androidx.core.graphics.ColorUtils.calculateLuminance(color(skin.background).toArgb()) > .5
+    val scheme = if (light) lightColorScheme() else darkColorScheme()
     CompositionLocalProvider(LocalSkin provides skin) {
-        MaterialTheme(colorScheme = darkColorScheme(
+        MaterialTheme(colorScheme = scheme.copy(
             primary = primary, onPrimary = onPrimary, secondary = primary,
-            background = color(skin.background), surface = color(skin.background),
+            background = color(skin.background), surface = color(skin.surface),
             surfaceContainer = color(skin.surface), surfaceContainerHigh = color(skin.surface),
             onSurface = color(skin.text), onBackground = color(skin.text), onSurfaceVariant = color(skin.muted),
             outline = color(skin.muted).copy(alpha = .5f), outlineVariant = color(skin.muted).copy(alpha = .2f),
@@ -90,10 +93,12 @@ internal fun ArtworkAtmosphere(uri: Uri?, modifier: Modifier = Modifier, content
     val request = remember(visibleUri, context) {
         ImageRequest.Builder(context).data(visibleUri).size(96).allowHardware(false).transformations(SoftArtwork()).build()
     }
-    val backdrop = if(LocalSkin.current.atmosphere) listOf(Color(0xFF49313F), Color(0xFF181620), Color(0xFF0E0E14)) else listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background)
+    val scheme = MaterialTheme.colorScheme
+    val light = androidx.core.graphics.ColorUtils.calculateLuminance(scheme.background.toArgb()) > .5
+    val backdrop = listOf(scheme.background, scheme.surfaceContainer, scheme.background)
     Box(modifier.background(Brush.verticalGradient(backdrop))) {
-        if (visibleUri != null) AsyncImage(request, null, Modifier.matchParentSize(), contentScale = ContentScale.Crop, alpha = .5f)
-        if(LocalSkin.current.atmosphere) Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(Color(0x33101017), Color(0xA6101017), Color(0xED101017)))))
+        if (visibleUri != null) AsyncImage(request, null, Modifier.matchParentSize(), contentScale = ContentScale.Crop, alpha = if(light) .12f else .35f)
+        if(LocalSkin.current.atmosphere) Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(scheme.background.copy(alpha = .25f), scheme.background.copy(alpha = .6f), scheme.background.copy(alpha = .95f)))))
         content()
     }
 }

@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import app.auralis.model.*
 
 /** Small private persistent index. No audio or artwork is stored in SQLite. */
-class LibraryDatabase(context: Context, name: String = "auralis-library.db") : SQLiteOpenHelper(context, name, null, 2) {
+class LibraryDatabase(context: Context, name: String = "auralis-library.db") : SQLiteOpenHelper(context, name, null, 3) {
     init { setWriteAheadLoggingEnabled(true) }
     override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
     override fun onCreate(db: SQLiteDatabase) {
@@ -21,13 +21,16 @@ class LibraryDatabase(context: Context, name: String = "auralis-library.db") : S
         db.execSQL("CREATE INDEX tracks_added ON tracks(added DESC)")
         db.execSQL("CREATE INDEX tracks_played ON tracks(played DESC)")
         db.execSQL("CREATE INDEX membership_track ON membership(track)")
-        createV2(db)
+        createFavorites(db)
     }
-    private fun createV2(db: SQLiteDatabase) {
+    private fun createFavorites(db: SQLiteDatabase) {
         db.execSQL("CREATE TABLE favorites(track TEXT PRIMARY KEY REFERENCES tracks(id) ON DELETE CASCADE)")
-        db.execSQL("CREATE TABLE analysis(track TEXT PRIMARY KEY REFERENCES tracks(id) ON DELETE CASCADE,fingerprint TEXT NOT NULL,energy REAL NOT NULL,tempo REAL NOT NULL,brightness REAL NOT NULL,confidence REAL NOT NULL)")
     }
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) { if (oldVersion < 2) createV2(db) }
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        if (oldVersion < 2) createFavorites(db)
+        // Only computed profiles are obsolete; sources, tracks, favorites and history stay intact.
+        if (oldVersion < 3) db.execSQL("DROP TABLE IF EXISTS analysis")
+    }
 
     fun sources(): List<LibrarySource> = readableDatabase.rawQuery("SELECT * FROM sources ORDER BY label COLLATE NOCASE", null).use { c ->
         buildList { while (c.moveToNext()) add(LibrarySource(c.text("uri"), c.text("label"), c.text("kind"), c.nullable("volume"), c.nullable("path"))) }
@@ -96,16 +99,6 @@ class LibraryDatabase(context: Context, name: String = "auralis-library.db") : S
         val extra = when(browse) { LibraryBrowse.HISTORY -> "played>0"; LibraryBrowse.FAVORITES -> "id IN (SELECT track FROM favorites)"; else -> "1=1" }
         return rows(listOfNotNull(filter, extra).joinToString(" AND "), args,
             if (browse == LibraryBrowse.HISTORY) "played DESC,id" else if (browse == LibraryBrowse.RECENT) "added DESC,id" else "title COLLATE NOCASE,id", limit)
-    }
-    fun analyses(): Map<String, SongFeatures> = readableDatabase.rawQuery("SELECT analysis.* FROM analysis JOIN tracks ON tracks.id=analysis.track WHERE analysis.fingerprint=CAST(tracks.modified AS TEXT)||':'||CAST(tracks.size AS TEXT)", null).use { c ->
-        buildMap { while(c.moveToNext()) put(c.text("track"), SongFeatures(c.getDouble(2), c.getDouble(3), c.getDouble(4), c.getDouble(5))) }
-    }
-    fun saveAnalysis(track: LibraryTrack, features: SongFeatures) {
-        if (this.track(track.id)?.fingerprint != track.fingerprint) return
-        writableDatabase.insertWithOnConflict("analysis", null, ContentValues().apply {
-            put("track", track.id); put("fingerprint", track.fingerprint); put("energy", features.energy); put("tempo", features.tempo)
-            put("brightness", features.brightness); put("confidence", features.confidence)
-        }, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
     fun search(query: String, artist: String? = null, album: String? = null, limit: Int = 500): List<LibraryTrack> {

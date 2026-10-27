@@ -46,8 +46,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
         )
         if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         setContent {
@@ -55,10 +55,21 @@ class MainActivity : ComponentActivity() {
             val state by model.state.collectAsStateWithLifecycle()
             val extensions: ExtensionViewModel = viewModel()
             val entries by extensions.entries.collectAsStateWithLifecycle()
-            val skin = entries.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }?.manifest?.skin
-            ReVaTheme(state.accent, skin) { ReVaScreen(state, model) }
+            val skinEntry = entries.lastOrNull { it.enabled && "skin.apply" in it.grants && it.manifest.skin != null }
+            val skin = skinEntry?.manifest?.skin?.let { value -> value.copy(seekBarStyle = skinEntry.seekBarStyle?.takeIf { it in value.seekBarStyles } ?: value.seekBarStyles.first()) }
+            SideEffect {
+                val dark = androidx.core.graphics.ColorUtils.calculateLuminance(android.graphics.Color.parseColor(skin?.background ?: "#FAF8F5")) <= .5
+                val bar = if (dark) SystemBarStyle.dark(android.graphics.Color.TRANSPARENT) else SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                enableEdgeToEdge(statusBarStyle = bar, navigationBarStyle = bar)
+            }
+            val artwork = entries.lastOrNull { it.enabled && "artwork.apply" in it.grants && it.manifest.artwork != null }?.artworkSettings
+            CompositionLocalProvider(LocalArtwork provides artwork) {
+                ReVaTheme(state.accent, skin) { ReVaScreen(state, model) }
+            }
         }
     }
+    override fun onStart() { super.onStart(); (application as ReVaApplication).companions.visibility(true) }
+    override fun onStop() { (application as ReVaApplication).companions.visibility(false); super.onStop() }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,9 +87,6 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
     val extensionPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { it?.let(extensions::importFile) }
     val webEntry = extensionRows.firstOrNull { it.enabled && "web.embed" in it.grants && it.manifest.id == webId && it.manifest.web != null }
     LaunchedEffect(webEntry, webId) { if(webId != null && webEntry == null) webId = null }
-    var flowDialog by rememberSaveable { mutableStateOf(false) }
-    val flow: FlowViewModel = viewModel()
-    val flowState by flow.state.collectAsStateWithLifecycle()
     val library: LibraryViewModel = viewModel()
     val home by library.home.collectAsStateWithLifecycle()
     val owner = LocalLifecycleOwner.current
@@ -119,7 +127,6 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
                         Text("ReVa", Modifier.padding(start = 9.dp), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
                 }, actions = {
-                    IconButton(onClick = { flow.reload(); flowDialog = true }) { Icon(Icons.Rounded.AutoAwesome, "Create a gradual playlist") }
                     IconButton(onClick = { settings = true }) { Icon(Icons.Rounded.Settings, "Appearance and playback settings") }
                 }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background))
             }, bottomBar = {
@@ -163,7 +170,7 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
                 } else home.index.message?.let { StatusMessage(it) }
                 when {
                     extensionPage && webEntry != null -> WebEmbedScreen(webEntry) { webId = null }
-                    extensionPage -> ExtensionScreen(extensionRows, extensionState, extensions, { extensionPicker.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }, model::playRemote, { id -> if(state.playing) model.togglePlayback(); webId = id })
+                    extensionPage -> ExtensionScreen(extensionRows, extensionState, extensions, { extensionPicker.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }, model::playRemote, { id -> if(state.playing) model.togglePlayback(); webId = id }, artworkUri = item?.mediaMetadata?.artworkUri, artworkTitle = item?.mediaMetadata?.title?.toString() ?: "Artwork preview")
                     settings -> SettingsScreen(state, model, home, library, { changingFolder = null; folderPicker.launch(null) }, { audioPicker.launch(arrayOf("*/*")) }, { musicPermission.launch(AudioPermission.name) }, { source -> changingFolder = source.uri; folderPicker.launch(android.net.Uri.parse(source.uri)) }, { extensionPage = true })
                     tab == 0 || tab == 1 -> HomeScreen(home, library, state.connected, { tracks, id ->
                         if (Build.VERSION.SDK_INT >= 33) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -185,11 +192,7 @@ private fun ReVaScreen(state: PlayerScreenState, model: PlayerViewModel) {
             }
         }
     }
-    if (flowDialog) FlowDialog(flowState, flow, item?.mediaId, { flowDialog = false }) { tracks ->
-        if (Build.VERSION.SDK_INT >= 33) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-        model.playFlow(tracks)
-        flowDialog = false
-    }
+    CompanionPanelDialog()
 
 }
 

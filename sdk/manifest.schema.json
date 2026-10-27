@@ -41,7 +41,8 @@
           "stream.play",
           "party.session",
           "web.embed",
-          "skin.apply"
+          "skin.apply",
+          "artwork.apply"
         ]
       }
     },
@@ -122,14 +123,28 @@
           "maxItems": 4,
           "uniqueItems": true,
           "items": {
-            "enum": ["classic", "pill", "segmented", "wave"]
+            "enum": [
+              "classic",
+              "pill",
+              "segmented",
+              "wave"
+            ]
           }
         },
         "artworkStyle": {
-          "enum": ["image", "ascii", "monochrome", "duotone"]
+          "enum": [
+            "image",
+            "ascii",
+            "monochrome",
+            "duotone"
+          ]
         },
         "coverMotion": {
-          "enum": ["none", "pulse", "turntable"]
+          "enum": [
+            "none",
+            "pulse",
+            "turntable"
+          ]
         }
       }
     },
@@ -177,7 +192,46 @@
           "pattern": "^https://"
         },
         "role": {
-          "enum": ["player", "dashboard"]
+          "enum": [
+            "player",
+            "dashboard"
+          ]
+        }
+      }
+    },
+    "artwork": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "motions",
+        "motion",
+        "sizePercent"
+      ],
+      "properties": {
+        "motions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "none",
+              "drift",
+              "tilt"
+            ]
+          }
+        },
+        "motion": {
+          "enum": [
+            "none",
+            "drift",
+            "tilt"
+          ]
+        },
+        "sizePercent": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 100
         }
       }
     }
@@ -201,6 +255,11 @@
     {
       "required": [
         "web"
+      ]
+    },
+    {
+      "required": [
+        "artwork"
       ]
     }
   ],
@@ -283,6 +342,22 @@
         "required": [
           "provider"
         ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "artwork"
+        ]
+      },
+      "then": {
+        "properties": {
+          "capabilities": {
+            "contains": {
+              "const": "artwork.apply"
+            }
+          }
+        }
       }
     }
   ]

@@ -17,7 +17,7 @@ class ExtensionSecurityTest {
     @Test fun publishedSdkExamplesAreAcceptedByAndroid() {
         val root = java.io.File(System.getProperty("auralis.fixtures")).parentFile.resolve("sdk/examples")
         val examples = root.listFiles { file -> file.name.endsWith(".auralis.json") }!!
-        assertEquals(7,examples.size)
+        assertEquals(8,examples.size)
         examples.forEach { ExtensionManifest.parse(it.readText()) }
     }
     @Test fun scriptsAndNativeCodeCannotBeImported() { denied { ExtensionManifest.parse(manifest(",\"script\":\"evil.js\"")) }; denied { ExtensionManifest.parse(manifest().replace("catalog.read", "device.exec")) } }
@@ -28,7 +28,7 @@ class ExtensionSecurityTest {
     }
     @Test fun unknownVersionsAndContributionCapabilitiesAreRejected() { denied { ExtensionManifest.parse(manifest().replace("\"apiVersion\":1", "\"apiVersion\":2")) }; denied { ExtensionManifest.parse(manifest().replace("\"catalog.read\",", "")) } }
     @Test fun parsingBoundsBytesDepthAndTrailingContent() { denied { ExtensionManifest.parse(" ".repeat(65_537)) }; denied { ExtensionManifest.parse("[".repeat(17)+"]".repeat(17)) }; denied { ExtensionManifest.parse(manifest()+" trailing") } }
-    @Test fun safeSkinRejectsUnreadableColorsAndExtremeLayout() { denied { Skin.parse(JSONObject().put("textScale",4)) }; denied { Skin.parse(JSONObject().put("background","#FFFFFF")) }; denied { Skin.parse(JSONObject().put("rowHeight",1)) }; assertEquals("compact", Skin.parse(JSONObject().put("layout","compact")).layout) }
+    @Test fun safeSkinRejectsUnreadableColorsAndExtremeLayout() { denied { Skin.parse(JSONObject().put("textScale",4)) }; denied { Skin.parse(JSONObject().put("background","#FFFFFF").put("text","#FFFFFF")) }; denied { Skin.parse(JSONObject().put("rowHeight",1)) }; assertEquals("compact", Skin.parse(JSONObject().put("layout","compact")).layout) }
     @Test fun visualTreatmentsAreDeclarativeAndBounded() {
         assertEquals("ascii", Skin.parse(JSONObject().put("artworkStyle", "ascii")).artworkStyle)
         assertEquals("turntable", Skin.parse(JSONObject().put("coverMotion", "turntable")).coverMotion)
@@ -62,6 +62,47 @@ class ExtensionSecurityTest {
         assertNull(registry.activeSkin)
         denied { Skin.parse(JSONObject().put("seekBarStyles", org.json.JSONArray(listOf("wave", "wave")))) }
         denied { Skin.parse(JSONObject().put("seekBarStyles", org.json.JSONArray(listOf("untrusted")))) }
+    }
+    private fun artworkManifest(id: String = "org.test.artwork") = """{"apiVersion":1,"id":"$id","name":"Artwork Motion","version":"1.0.0","capabilities":["artwork.apply"],"origins":[],"artwork":{"motions":["drift","tilt","none"],"motion":"drift","sizePercent":90}}"""
+    @Test fun artworkRequiresExplicitGrantAndBoundedHostSettings() {
+        val text = artworkManifest()
+        assertEquals(90, ExtensionManifest.parse(text).artwork!!.sizePercent)
+        denied { ExtensionManifest.parse(text.replace("[\"artwork.apply\"]", "[\"skin.apply\"]")) }
+        for (bad in listOf("59", "101", "90.5", "\"90\"", "null", "true")) {
+            denied { ExtensionManifest.parse(text.replace("\"sizePercent\":90", "\"sizePercent\":$bad")) }
+        }
+        denied { ExtensionManifest.parse(text.replace("\"motion\":\"drift\"", "\"motion\":\"script\"")) }
+        denied { ExtensionManifest.parse(text.replace("[\"drift\",\"tilt\",\"none\"]", "[\"drift\",\"drift\"]")) }
+        denied { ExtensionManifest.parse(text.replace("\"sizePercent\":90", "\"sizePercent\":90,\"url\":\"https://example.com/video\"")) }
+        denied { ExtensionManifest.parse(text.replace("\"sizePercent\":90", "\"sizePercent\":90,\"sizePercent\":100")) }
+    }
+    @Test fun artworkPreferencesPersistAndRevokeWithoutChangingSkin() {
+        val context = RuntimeEnvironment.getApplication()
+        val registry = ExtensionRegistry(context)
+        registry.install("""{"apiVersion":1,"id":"org.test.skin","name":"Skin","version":"1.0.0","capabilities":["skin.apply"],"origins":[],"skin":{"coverMotion":"pulse"}}""")
+        registry.enable("org.test.skin", true)
+        registry.install(artworkManifest())
+        denied { registry.chooseArtwork("org.test.artwork", "tilt", 80) }
+        assertNull(registry.activeArtwork)
+        registry.enable("org.test.artwork", true)
+        registry.chooseArtwork("org.test.artwork", "tilt", 75)
+        assertEquals("pulse", registry.activeSkin!!.coverMotion)
+        assertEquals("tilt", ExtensionRegistry(context).activeArtwork!!.motion)
+        assertEquals(75, ExtensionRegistry(context).activeArtwork!!.sizePercent)
+        denied { registry.chooseArtwork("org.test.artwork", "pulse", 80) }
+        denied { registry.chooseArtwork("org.test.artwork", "tilt", 101) }
+        registry.install(artworkManifest("org.test.other"))
+        registry.enable("org.test.other", true)
+        assertEquals("org.test.other", registry.activeArtworkEntry!!.manifest.id)
+        registry.remove("org.test.other")
+        assertEquals("tilt", registry.activeArtwork!!.motion)
+        registry.enable("org.test.artwork", false)
+        assertNull(ExtensionRegistry(context).activeArtwork)
+        assertNotNull(registry.activeSkin)
+        registry.install(artworkManifest().replace("1.0.0", "1.0.1"))
+        assertNull(registry.activeArtwork)
+        registry.enable("org.test.artwork", true)
+        assertEquals(90, registry.activeArtwork!!.sizePercent)
     }
     @Test fun installsDisabledAndPartialGrantsAreEnforced() {
         val registry = ExtensionRegistry(RuntimeEnvironment.getApplication()); registry.install(manifest())

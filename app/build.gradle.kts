@@ -12,8 +12,8 @@ android {
         applicationId = "app.auralis"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.5.1-dev"
+        versionCode = 10
+        versionName = "0.7.0-dev"
     }
     if (releaseKeystore != null) {
         signingConfigs {
@@ -55,6 +55,8 @@ android {
 }
 kotlin { jvmToolchain(17) }
 dependencies {
+    implementation(project(":extension-sdk"))
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation(project(":core-model"))
     implementation(project(":core-playback"))
     implementation("androidx.media3:media3-extractor:1.6.1")

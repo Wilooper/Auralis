@@ -1,8 +1,9 @@
 <resources>
-    <style name="Theme.ReVa" parent="android:style/Theme.Material.NoActionBar">
+    <style name="Theme.ReVa" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:colorAccent">#69E0BE</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">#FAF8F5</item>
+        <item name="android:colorAccent">#006B5E</item>
         <item name="android:windowActionModeOverlay">true</item>
     </style>
 </resources>
